@@ -822,12 +822,36 @@ function formatText(text) {
     .replace(/- /g, "• ");
 }
 
-function renderHome() {
+function renderLessonsList() {
   const filteredLessons = lessons.filter(lesson => {
     const text = `${lesson.title} ${lesson.content}`.toLowerCase();
     return text.includes(searchTerm.toLowerCase());
   });
 
+  const lessonsCount = document.getElementById("lessonsCount");
+  const lessonsGrid = document.getElementById("lessonsGrid");
+
+  lessonsCount.innerHTML = `${filteredLessons.length} fiche(s) trouvée(s)`;
+
+  lessonsGrid.innerHTML = filteredLessons.length > 0
+    ? filteredLessons.map((lesson) => {
+        const index = lessons.indexOf(lesson);
+        return `
+          <article class="fiche-card" onclick="openLesson(${index})">
+            <span class="fiche-num">Fiche ${index + 1}</span>
+            <h3>${highlightText(lesson.title, searchTerm)}</h3>
+            <p>${highlightText(lesson.content.trim().slice(0, 140), searchTerm)}...</p>
+          </article>
+        `;
+      }).join("")
+    : `
+      <div class="empty-state">
+        Aucun résultat pour "<strong>${escapeHtml(searchTerm)}</strong>".
+      </div>
+    `;
+}
+
+function renderHome() {
   content.innerHTML = `
     <div class="card">
       <h2 style="margin-top:0;">Palettes de révision</h2>
@@ -842,36 +866,20 @@ function renderHome() {
         />
       </div>
 
-      <div style="margin: 10px 0 20px; color:#64748b; font-size:14px;">
-        ${filteredLessons.length} fiche(s) trouvée(s)
-      </div>
+      <div id="lessonsCount" style="margin: 10px 0 20px; color:#64748b; font-size:14px;"></div>
 
-      <div class="lessons-grid">
-        ${filteredLessons.length > 0
-          ? filteredLessons.map((lesson) => {
-              const index = lessons.indexOf(lesson);
-              return `
-                <article class="fiche-card" onclick="openLesson(${index})">
-                  <span class="fiche-num">Fiche ${index + 1}</span>
-                  <h3>${highlightText(lesson.title, searchTerm)}</h3>
-                  <p>${highlightText(lesson.content.trim().slice(0, 140), searchTerm)}...</p>
-                </article>
-              `;
-            }).join("")
-          : `
-            <div class="empty-state">
-              Aucun résultat pour "<strong>${escapeHtml(searchTerm)}</strong>".
-            </div>
-          `}
-      </div>
+      <div id="lessonsGrid" class="lessons-grid"></div>
     </div>
   `;
 
   const searchInput = document.getElementById("searchInput");
+
   searchInput.addEventListener("input", (e) => {
     searchTerm = e.target.value;
-    renderHome();
+    renderLessonsList();
   });
+
+  renderLessonsList();
 }
 
 function openLesson(index) {
