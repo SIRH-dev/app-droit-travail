@@ -786,7 +786,7 @@ let currentFlashcard = 0;
 let currentQuiz = 0;
 let score = 0;
 let selectedAnswer = null;
-
+let searchTerm = "";
 const content = document.getElementById("content");
 const courseBtn = document.getElementById("courseBtn");
 const flashcardsBtn = document.getElementById("flashcardsBtn");
