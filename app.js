@@ -1,26 +1,61 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Révision Droit du travail</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="app">
-    <aside class="sidebar">
-      <h1>📘 Droit du travail</h1>
-      <p class="subtitle">Application de révision</p>
+const lessons = [
+  {
+    title: "Fiche 1",
+    content: "Contenu de test"
+  },
+  {
+    title: "Fiche 2",
+    content: "Deuxième fiche"
+  }
+];
 
-      <button id="courseBtn" class="nav-btn active">Cours</button>
-      <button id="flashcardsBtn" class="nav-btn">Flashcards</button>
-      <button id="quizBtn" class="nav-btn">Quiz</button>
-    </aside>
+const content = document.getElementById("content");
+const courseBtn = document.getElementById("courseBtn");
+const flashcardsBtn = document.getElementById("flashcardsBtn");
+const quizBtn = document.getElementById("quizBtn");
 
-    <main class="content" id="content">
-    </main>
-  </div>
+function setActiveButton(activeBtn) {
+  [courseBtn, flashcardsBtn, quizBtn].forEach(btn => btn.classList.remove("active"));
+  activeBtn.classList.add("active");
+}
 
-  <script src="app.js"></script>
-</body>
-</html>
+function renderHome() {
+  content.innerHTML = `
+    <div class="card">
+      <h2>Palettes de révision</h2>
+      <div>
+        ${lessons.map((lesson, index) => `
+          <button onclick="openLesson(${index})">${lesson.title}</button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function openLesson(index) {
+  const lesson = lessons[index];
+  content.innerHTML = `
+    <div class="card">
+      <button onclick="renderHome()">← Retour</button>
+      <h2>${lesson.title}</h2>
+      <p>${lesson.content}</p>
+    </div>
+  `;
+}
+
+courseBtn.addEventListener("click", () => {
+  setActiveButton(courseBtn);
+  renderHome();
+});
+
+flashcardsBtn.addEventListener("click", () => {
+  setActiveButton(flashcardsBtn);
+  content.innerHTML = `<div class="card"><h2>Flashcards</h2><p>Section en test.</p></div>`;
+});
+
+quizBtn.addEventListener("click", () => {
+  setActiveButton(quizBtn);
+  content.innerHTML = `<div class="card"><h2>Quiz</h2><p>Section en test.</p></div>`;
+});
+
+renderHome();
