@@ -16,11 +16,16 @@ body {
 
 .sidebar {
   width: 260px;
-  background: linear-gradient(180deg, #7f1d1d, #991b1b);
+  background:
+    linear-gradient(180deg, rgba(127, 29, 29, 0.85), rgba(17, 24, 39, 0.95)),
+    url("code-du-travail.jpg") center/cover no-repeat;
   color: white;
   padding: 24px;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 }
+
 
 .sidebar h1 {
   font-size: 20px;
