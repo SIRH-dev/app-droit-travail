@@ -155,3 +155,9 @@ button:disabled {
   color: #475569;
   background: #f8fafc;
 }
+mark {
+  background: #fef08a;
+  color: #0f172a;
+  padding: 0 2px;
+  border-radius: 4px;
+}
