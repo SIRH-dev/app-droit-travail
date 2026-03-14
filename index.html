@@ -251,6 +251,40 @@ body{padding-bottom:72px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
+/* ===== BLOG ===== */
+.blog-container{max-width:900px;margin:0 auto;padding:1rem}
+.blog-filter{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.blog-filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:.3rem .8rem;border-radius:999px;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif;transition:all .2s}
+.blog-filter-btn.active{background:var(--accent);color:#0e0f13;border-color:var(--accent)}
+.blog-grid{display:grid;grid-template-columns:1fr;gap:1rem}
+@media(min-width:600px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:900px){.blog-grid{grid-template-columns:repeat(3,1fr)}}
+.blog-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;display:flex;flex-direction:column;gap:.6rem;transition:all .22s;text-decoration:none;color:inherit}
+.blog-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 30px var(--shadow)}
+.blog-card:active{transform:scale(.98)}
+.blog-card-tag{font-size:.65rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);background:rgba(232,201,110,.1);padding:.2rem .5rem;border-radius:4px;width:fit-content}
+.blog-card-title{font-size:.95rem;font-weight:600;line-height:1.45;color:var(--text)}
+.blog-card-excerpt{font-size:.8rem;color:var(--text-muted);line-height:1.6;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.blog-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:.25rem}
+.blog-card-date{font-size:.7rem;color:var(--text-muted);font-family:'DM Mono',monospace}
+.blog-card-read{font-size:.75rem;color:var(--accent);font-weight:600}
+.blog-loading{text-align:center;padding:3rem;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;gap:1rem}
+.blog-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.blog-error{text-align:center;padding:2rem;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:14px}
+.blog-error a{color:var(--accent)}
+/* ===== SUBSCRIBE BUTTON ===== */
+.subscribe-btn{background:var(--accent);border:none;color:#0e0f13;padding:.35rem .85rem;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .2s;white-space:nowrap}
+.subscribe-btn:hover{opacity:.85;transform:translateY(-1px)}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:2rem;width:100%;max-width:460px;position:relative;transform:translateY(20px);transition:transform .3s;max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-close{position:absolute;top:1rem;right:1rem;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{border-color:var(--wrong);color:var(--wrong)}
+.modal-brevo{margin-top:.5rem}
 /* ===== QUIZ FILTER ===== */
 .quiz-filter{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
 .q-filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:.3rem .7rem;border-radius:999px;cursor:pointer;font-size:.72rem;font-family:'DM Sans',sans-serif;transition:all .2s}
@@ -269,13 +303,102 @@ body{padding-bottom:72px}
       <button class="top-nav-tab" onclick="showScreen('flashcards')">🃏 Flashcards</button>
       <button class="top-nav-tab" onclick="showScreen('quiz')">🎯 Quiz</button>
       <button class="top-nav-tab" onclick="showScreen('recap')">📋 Récap</button>
+      <button class="top-nav-tab" onclick="showScreen('blog')">✍️ Blog</button>
     </nav>
     <div class="header-actions">
+      <button class="subscribe-btn" onclick="openModal()">📧 S'abonner</button>
       <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Changer le thème">🌙</button>
       <div class="progress-chip" id="global-progress">0/28</div>
     </div>
   </div>
 </header>
+
+<!-- MODAL ABONNEMENT -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-brevo">
+      <!-- Begin Brevo Form -->
+      <style>
+        @font-face{font-display:block;font-family:Roboto;src:url(https://assets.brevo.com/font/Roboto/Latin/normal/normal/7529907e9eaf8ebb5220c5f9850e3811.woff2) format("woff2"),url(https://assets.brevo.com/font/Roboto/Latin/normal/normal/25c678feafdc175a70922a116c9be3e7.woff) format("woff")}
+        @font-face{font-display:fallback;font-family:Roboto;font-weight:600;src:url(https://assets.brevo.com/font/Roboto/Latin/medium/normal/6e9caeeafb1f3491be3e32744bc30440.woff2) format("woff2"),url(https://assets.brevo.com/font/Roboto/Latin/medium/normal/71501f0d8d5aa95960f6475d5487d4c2.woff) format("woff")}
+        #sib-container input::placeholder{text-align:left;font-family:Helvetica,sans-serif;color:#c0ccda}
+        #sib-container a{text-decoration:underline;color:#2BB2FC}
+        .modal-brevo .sib-form{background:transparent !important;padding:0 !important}
+        .modal-brevo #sib-container{border:none !important;background:transparent !important;max-width:100% !important;border-radius:0 !important}
+        .modal-brevo .sib-form-block__button{background-color:var(--accent) !important;color:#0e0f13 !important;border-radius:10px !important;font-weight:700 !important;width:100%;padding:.75rem !important;font-size:.95rem !important;cursor:pointer}
+        .modal-brevo .sib-form-block p{color:var(--text) !important;font-family:'DM Sans',sans-serif !important}
+        .modal-brevo .entry__label{color:var(--text-muted) !important;font-family:'DM Sans',sans-serif !important;font-size:.85rem !important}
+        .modal-brevo .input{border:1px solid var(--border) !important;border-radius:10px !important;padding:.7rem 1rem !important;background:var(--surface2) !important;color:var(--text) !important;width:100% !important;font-size:.9rem !important}
+        .modal-brevo .input:focus{outline:none !important;border-color:var(--accent) !important}
+        .modal-brevo #error-message{border-radius:8px !important}
+        .modal-brevo #success-message{border-radius:8px !important}
+      </style>
+      <link rel="stylesheet" href="https://sibforms.com/forms/end-form/build/sib-styles.css">
+      <div class="sib-form">
+        <div id="sib-form-container" class="sib-form-container">
+          <div id="error-message" class="sib-form-message-panel" style="font-size:14px;text-align:left;font-family:Helvetica,sans-serif;color:#661d1d;background-color:#ffeded;border-radius:8px;border-color:#ff4949;max-width:100%;display:none">
+            <div class="sib-form-message-panel__text sib-form-message-panel__text--center">
+              <span>Nous n'avons pas pu confirmer votre inscription.</span>
+            </div>
+          </div>
+          <div id="success-message" class="sib-form-message-panel" style="font-size:14px;text-align:left;font-family:Helvetica,sans-serif;color:#085229;background-color:#e7faf0;border-radius:8px;border-color:#13ce66;max-width:100%;display:none">
+            <div class="sib-form-message-panel__text sib-form-message-panel__text--center">
+              <span>🎉 Votre inscription est confirmée !</span>
+            </div>
+          </div>
+          <div id="sib-container" class="sib-container--large sib-container--vertical" style="text-align:center;background-color:transparent;max-width:100%;direction:ltr">
+            <form id="sib-form" method="POST" action="https://2baff920.sibforms.com/serve/MUIFAD2Gyh81Kn1j-gAmFsCb9abwzHZmtBrXd7UglIum_S2ipSfL6WIcYfjJOEppWUB7nsd8lH5vNJPh_1pevmpRfWQ4kCSq8c5kJv4WU28NQfx4oeOEWY5qEfeNbDHLVCYoo4nJaos8emIUQlhQkScivj_f2_ARpUW_Pp_3t2qWT1x0t0ikn9xE2qeWj1gy9oqV-qaHFcBhTjNQLA==" data-type="subscription">
+              <div style="padding:6px 0">
+                <div class="sib-form-block" style="font-size:22px;text-align:left;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--text)">
+                  <p>Restez informé avec LexStudy</p>
+                </div>
+              </div>
+              <div style="padding:4px 0 12px">
+                <div class="sib-form-block" style="font-size:14px;text-align:left;font-family:'DM Sans',sans-serif;color:var(--text-muted)">
+                  <p>Recevez les mises à jour du Droit du Travail 2025 directement dans votre boîte mail.</p>
+                </div>
+              </div>
+              <div style="padding:6px 0">
+                <div class="sib-input sib-form-block">
+                  <div class="form__entry entry_block">
+                    <div class="form__label-row">
+                      <label class="entry__label" style="font-weight:600;text-align:left;font-size:.83rem;font-family:'DM Sans',sans-serif;color:var(--text-muted)" for="EMAIL">Votre adresse email *</label>
+                      <div class="entry__field">
+                        <input class="input" type="email" id="EMAIL" name="EMAIL" autocomplete="off" placeholder="exemple@email.com" data-required="true" required/>
+                      </div>
+                    </div>
+                    <label class="entry__error entry__error--primary" style="font-size:13px;text-align:left;font-family:Helvetica,sans-serif;color:#661d1d;background-color:#ffeded;border-radius:6px;border-color:#ff4949;"></label>
+                  </div>
+                </div>
+              </div>
+              <div style="padding:10px 0 4px">
+                <div class="sib-form-block" style="text-align:left">
+                  <button class="sib-form-block__button sib-form-block__button-with-loader" style="font-size:.95rem;font-weight:700;font-family:'DM Sans',sans-serif;color:#0e0f13;background-color:var(--accent);border-radius:10px;border-width:0;width:100%;padding:.75rem;cursor:pointer" form="sib-form" type="submit">
+                    📧 Je m'abonne gratuitement
+                  </button>
+                </div>
+              </div>
+              <input type="text" name="email_address_check" value="" class="input--hidden" style="display:none">
+              <input type="hidden" name="locale" value="fr">
+            </form>
+          </div>
+        </div>
+      </div>
+      <script>
+        window.REQUIRED_CODE_ERROR_MESSAGE='Veuillez choisir un code pays';
+        window.LOCALE='fr';
+        window.EMAIL_INVALID_MESSAGE=window.SMS_INVALID_MESSAGE="Les informations fournies ne sont pas valides.";
+        window.REQUIRED_ERROR_MESSAGE="Vous devez renseigner ce champ.";
+        window.GENERIC_INVALID_MESSAGE="Les informations fournies ne sont pas valides.";
+        window.translation={common:{selectedList:'{quantity} liste sélectionnée',selectedLists:'{quantity} listes sélectionnées'}};
+        var AUTOHIDE=Boolean(0);
+      </script>
+      <script defer src="https://sibforms.com/forms/end-form/build/main.js"></script>
+      <!-- End Brevo Form -->
+    </div>
+  </div>
+</div>
 
 <!-- BOTTOM NAV (mobile) -->
 <nav class="bottom-nav">
@@ -283,7 +406,7 @@ body{padding-bottom:72px}
   <button class="bottom-nav-item" onclick="showScreen('fiches')"><span class="nav-icon">📚</span>Fiches</button>
   <button class="bottom-nav-item" onclick="showScreen('flashcards')"><span class="nav-icon">🃏</span>Cartes</button>
   <button class="bottom-nav-item" onclick="showScreen('quiz')"><span class="nav-icon">🎯</span>Quiz</button>
-  <button class="bottom-nav-item" onclick="showScreen('recap')"><span class="nav-icon">📋</span>Récap</button>
+  <button class="bottom-nav-item" onclick="showScreen('blog')"><span class="nav-icon">✍️</span>Blog</button>
 </nav>
 
 <!-- HOME -->
@@ -402,7 +525,22 @@ body{padding-bottom:72px}
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- BLOG -->
+<div id="screen-blog" class="screen">
+  <div class="blog-container">
+    <div class="section-header">
+      <h2>✍️ Blog TopSIRH</h2>
+      <p>Actualités droit du travail & conseils RH/SIRH — <a href="https://topsirh.substack.com" target="_blank" style="color:var(--accent)">S'abonner sur Substack</a></p>
+    </div>
+    <div id="blog-filter" class="blog-filter"></div>
+    <div id="blog-grid" class="blog-grid">
+      <div class="blog-loading">
+        <div class="blog-spinner"></div>
+        <p>Chargement des articles...</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // =============================================
@@ -618,7 +756,7 @@ function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.top-nav-tab,.bottom-nav-item').forEach(t=>t.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
-  const map={home:0,fiches:1,flashcards:2,quiz:3,recap:4};
+  const map={home:0,fiches:1,flashcards:2,quiz:3,recap:4,blog:5};
   if(map[name]!==undefined){
     document.querySelectorAll('.top-nav-tab')[map[name]]?.classList.add('active');
     document.querySelectorAll('.bottom-nav-item')[map[name]]?.classList.add('active');
@@ -628,6 +766,7 @@ function showScreen(name){
   if(name==='quiz') initQuiz();
   if(name==='recap') renderRecap();
   if(name==='home') updateHome();
+  if(name==='blog') loadBlog();
   window.scrollTo(0,0);
 }
 
@@ -908,6 +1047,100 @@ function toast(msg,type=''){
   clearTimeout(t._t);
   t._t=setTimeout(()=>t.className='toast',2500);
 }
+
+// =============================================
+// BLOG — Substack RSS
+// =============================================
+const SUBSTACK_URL = 'https://topsirh.substack.com';
+const RSS_URL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(SUBSTACK_URL+'/feed')}&api_key=public&count=20`;
+let blogPosts = [];
+let blogFilter = 'Tous';
+let blogLoaded = false;
+
+async function loadBlog() {
+  if (blogLoaded) { renderBlog(); return; }
+  try {
+    const res = await fetch(RSS_URL);
+    const data = await res.json();
+    if (data.status === 'ok' && data.items) {
+      blogPosts = data.items.map(item => ({
+        title: item.title,
+        excerpt: stripHtml(item.description || item.content || '').slice(0, 160) + '...',
+        date: new Date(item.pubDate).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}),
+        link: item.link,
+        tag: detectTag(item.title + ' ' + (item.description || '')),
+        thumbnail: item.thumbnail || item.enclosure?.link || null
+      }));
+      blogLoaded = true;
+      renderBlogFilters();
+      renderBlog();
+    } else {
+      showBlogError();
+    }
+  } catch(e) {
+    showBlogError();
+  }
+}
+
+function stripHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function detectTag(text) {
+  const t = text.toLowerCase();
+  if (t.includes('sirh') || t.includes('rh') || t.includes('ressources humaines') || t.includes('logiciel') || t.includes('digital')) return 'RH / SIRH';
+  if (t.includes('contrat') || t.includes('licenciem') || t.includes('droit') || t.includes('salaire') || t.includes('cdd') || t.includes('cdi')) return 'Droit du travail';
+  return 'Actualités';
+}
+
+function renderBlogFilters() {
+  const tags = ['Tous', ...new Set(blogPosts.map(p => p.tag))];
+  document.getElementById('blog-filter').innerHTML = tags.map(t =>
+    `<button class="blog-filter-btn${t==='Tous'?' active':''}" onclick="setBlogFilter('${t}')">${t}</button>`
+  ).join('');
+}
+
+function setBlogFilter(tag) {
+  blogFilter = tag;
+  document.querySelectorAll('.blog-filter-btn').forEach(b => b.classList.toggle('active', b.textContent === tag));
+  renderBlog();
+}
+
+function renderBlog() {
+  const filtered = blogFilter === 'Tous' ? blogPosts : blogPosts.filter(p => p.tag === blogFilter);
+  if (!filtered.length) {
+    document.getElementById('blog-grid').innerHTML = `<div class="blog-error"><p>Aucun article dans cette catégorie.</p></div>`;
+    return;
+  }
+  document.getElementById('blog-grid').innerHTML = filtered.map(p => `
+    <a class="blog-card" href="${p.link}" target="_blank" rel="noopener">
+      <div class="blog-card-tag">${p.tag}</div>
+      <div class="blog-card-title">${p.title}</div>
+      <div class="blog-card-excerpt">${p.excerpt}</div>
+      <div class="blog-card-footer">
+        <span class="blog-card-date">${p.date}</span>
+        <span class="blog-card-read">Lire →</span>
+      </div>
+    </a>`).join('');
+}
+
+function showBlogError() {
+  document.getElementById('blog-grid').innerHTML = `
+    <div class="blog-error">
+      <p style="font-size:2rem;margin-bottom:.5rem">📡</p>
+      <p style="font-weight:600;margin-bottom:.5rem">Impossible de charger les articles</p>
+      <p style="font-size:.83rem">Consulte directement le blog sur <a href="${SUBSTACK_URL}" target="_blank">Substack</a></p>
+    </div>`;
+}
+
+// =============================================
+// MODAL
+// =============================================
+function openModal(){document.getElementById('modal-overlay').classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal()});
 
 // =============================================
 // INIT
