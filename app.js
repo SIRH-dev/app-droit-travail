@@ -782,7 +782,6 @@ const quizQuestions = [
   }
 ];
 
-let currentLesson = 0;
 let currentFlashcard = 0;
 let currentQuiz = 0;
 let score = 0;
@@ -811,42 +810,46 @@ function formatText(text) {
     .replace(/- /g, "• ");
 }
 
-function renderLesson() {
-  const lesson = lessons[currentLesson];
+function renderHome() {
+  content.innerHTML = `
+    <div class="card">
+      <h2 style="margin-top:0;">Palettes de révision</h2>
+      <p style="color:#64748b; margin-bottom:24px;">Choisis une fiche pour l’ouvrir.</p>
+
+      <div class="lessons-grid">
+        ${lessons.map((lesson, index) => `
+          <div class="fiche-card" onclick="openLesson(${index})">
+            <span class="fiche-num">Fiche ${index + 1}</span>
+            <h3>${lesson.title}</h3>
+            <p>${escapeHtml(lesson.content.trim().slice(0, 140))}...</p>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function openLesson(index) {
+  const lesson = lessons[index];
 
   content.innerHTML = `
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
-        <h2 style="margin:0;">${lesson.title}</h2>
+        <button id="backHome">← Retour aux palettes</button>
         <span style="background:#e5edff; color:#2563eb; padding:6px 10px; border-radius:999px; font-size:14px;">
-          ${currentLesson + 1} / ${lessons.length}
+          Fiche ${index + 1} / ${lessons.length}
         </span>
       </div>
 
-      <div style="line-height:1.7; white-space:normal; font-size:15px;">
-        ${formatText(lesson.content)}
-      </div>
+      <h2 style="margin-top:0;">${lesson.title}</h2>
 
-      <div style="display:flex; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap;">
-        <button id="prevLesson" ${currentLesson === 0 ? "disabled" : ""}>⬅ Précédent</button>
-        <button id="nextLesson" ${currentLesson === lessons.length - 1 ? "disabled" : ""}>Suivant ➡</button>
+      <div style="line-height:1.8; font-size:15px;">
+        ${formatText(lesson.content)}
       </div>
     </div>
   `;
 
-  document.getElementById("prevLesson").addEventListener("click", () => {
-    if (currentLesson > 0) {
-      currentLesson--;
-      renderLesson();
-    }
-  });
-
-  document.getElementById("nextLesson").addEventListener("click", () => {
-    if (currentLesson < lessons.length - 1) {
-      currentLesson++;
-      renderLesson();
-    }
-  });
+  document.getElementById("backHome").addEventListener("click", renderHome);
 }
 
 function renderFlashcard() {
@@ -997,7 +1000,7 @@ function renderQuiz() {
 
 courseBtn.addEventListener("click", () => {
   setActiveButton(courseBtn);
-  renderLesson();
+  renderHome();
 });
 
 flashcardsBtn.addEventListener("click", () => {
@@ -1011,4 +1014,4 @@ quizBtn.addEventListener("click", () => {
 });
 
 setActiveButton(courseBtn);
-renderLesson();
+renderHome();
