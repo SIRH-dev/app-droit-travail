@@ -787,6 +787,7 @@ let currentQuiz = 0;
 let score = 0;
 let selectedAnswer = null;
 let searchTerm = "";
+
 const content = document.getElementById("content");
 const courseBtn = document.getElementById("courseBtn");
 const flashcardsBtn = document.getElementById("flashcardsBtn");
@@ -802,6 +803,17 @@ function escapeHtml(text) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+function highlightText(text, term) {
+  const safeText = escapeHtml(text);
+
+  if (!term.trim()) return safeText;
+
+  const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escapedTerm})`, "gi");
+
+  return safeText.replace(regex, "<mark>$1</mark>");
 }
 
 function formatText(text) {
@@ -841,8 +853,8 @@ function renderHome() {
               return `
                 <article class="fiche-card" onclick="openLesson(${index})">
                   <span class="fiche-num">Fiche ${index + 1}</span>
-                  <h3>${lesson.title}</h3>
-                  <p>${escapeHtml(lesson.content.trim().slice(0, 140))}...</p>
+                  <h3>${highlightText(lesson.title, searchTerm)}</h3>
+                  <p>${highlightText(lesson.content.trim().slice(0, 140), searchTerm)}...</p>
                 </article>
               `;
             }).join("")
@@ -861,7 +873,6 @@ function renderHome() {
     renderHome();
   });
 }
-
 
 function openLesson(index) {
   const lesson = lessons[index];
@@ -1049,3 +1060,4 @@ quizBtn.addEventListener("click", () => {
 
 setActiveButton(courseBtn);
 renderHome();
+
