@@ -5,8 +5,8 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #f4f7fb;
-  color: #1f2937;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 .app {
@@ -22,7 +22,7 @@ body {
 }
 
 .sidebar h1 {
-  font-size: 24px;
+  font-size: 20px;
   margin-bottom: 8px;
 }
 
@@ -31,21 +31,22 @@ body {
   margin-bottom: 24px;
 }
 
-.nav-btn {
+.nav-btn,
+button {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #1e293b;
   color: white;
   cursor: pointer;
-  font-size: 16px;
-  text-align: left;
+  font-size: 15px;
 }
 
 .nav-btn.active,
-.nav-btn:hover {
+.nav-btn:hover,
+button:hover {
   background: #2563eb;
 }
 
@@ -54,80 +55,14 @@ body {
   padding: 32px;
 }
 
-.view {
-  display: none;
-}
-
-.view.active {
-  display: block;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-}
-
 .card {
   background: white;
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-}
-
-.card h3 {
-  margin-top: 0;
-  font-size: 18px;
-}
-
-.card p {
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.flashcard-box,
-.quiz-box {
-  background: white;
+  border-radius: 20px;
   padding: 24px;
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  max-width: 700px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
-.flashcard {
-  min-height: 120px;
-  background: #eff6ff;
-  border: 2px dashed #60a5fa;
-  border-radius: 14px;
-  padding: 24px;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
-
-.flash-actions {
-  margin-top: 16px;
-  display: flex;
-  gap: 12px;
-}
-
-button {
-  padding: 12px 16px;
-  border: none;
-  border-radius: 10px;
-  background: #2563eb;
-  color: white;
-  cursor: pointer;
-  font-size: 15px;
-}
-
-button:hover {
-  background: #1d4ed8;
-}
-
-.answers {
-  display: grid;
-  gap: 10px;
-  margin: 16px
