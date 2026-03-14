@@ -811,23 +811,57 @@ function formatText(text) {
 }
 
 function renderHome() {
+  const filteredLessons = lessons.filter(lesson => {
+    const text = `${lesson.title} ${lesson.content}`.toLowerCase();
+    return text.includes(searchTerm.toLowerCase());
+  });
+
   content.innerHTML = `
     <div class="card">
       <h2 style="margin-top:0;">Palettes de révision</h2>
-      <p style="color:#64748b; margin-bottom:24px;">Choisis une fiche pour l’ouvrir.</p>
+      <p style="color:#64748b; margin-bottom:16px;">Choisis une fiche pour l’ouvrir.</p>
+
+      <div class="search-box">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Rechercher une fiche, un mot-clé, un thème..."
+          value="${escapeHtml(searchTerm)}"
+        />
+      </div>
+
+      <div style="margin: 10px 0 20px; color:#64748b; font-size:14px;">
+        ${filteredLessons.length} fiche(s) trouvée(s)
+      </div>
 
       <div class="lessons-grid">
-        ${lessons.map((lesson, index) => `
-          <div class="fiche-card" onclick="openLesson(${index})">
-            <span class="fiche-num">Fiche ${index + 1}</span>
-            <h3>${lesson.title}</h3>
-            <p>${escapeHtml(lesson.content.trim().slice(0, 140))}...</p>
-          </div>
-        `).join("")}
+        ${filteredLessons.length > 0
+          ? filteredLessons.map((lesson) => {
+              const index = lessons.indexOf(lesson);
+              return `
+                <article class="fiche-card" onclick="openLesson(${index})">
+                  <span class="fiche-num">Fiche ${index + 1}</span>
+                  <h3>${lesson.title}</h3>
+                  <p>${escapeHtml(lesson.content.trim().slice(0, 140))}...</p>
+                </article>
+              `;
+            }).join("")
+          : `
+            <div class="empty-state">
+              Aucun résultat pour "<strong>${escapeHtml(searchTerm)}</strong>".
+            </div>
+          `}
       </div>
     </div>
   `;
+
+  const searchInput = document.getElementById("searchInput");
+  searchInput.addEventListener("input", (e) => {
+    searchTerm = e.target.value;
+    renderHome();
+  });
 }
+
 
 function openLesson(index) {
   const lesson = lessons[index];
