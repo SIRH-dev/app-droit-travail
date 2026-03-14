@@ -706,7 +706,7 @@ Obligations principales du salarié :
 
 6. L’écrit
 Le contrat est formé dès l’échange des consentements.
-Mais en CDI, l’employeur doit remettre au salarié, au plus tard dans les deux mois de l’embauche selon le passage du support, un document écrit en français contenant les mentions obligatoires.
+Mais en CDI, l’employeur doit remettre au salarié un document écrit en français contenant les mentions obligatoires.
 
 Mentions obligatoires principales :
 - identité des parties ;
@@ -818,8 +818,6 @@ Conditions :
 - intérêt de l’entreprise ;
 - zone géographique définie dans la clause.
 
-Le support évoque aussi la suspension de la clause dans certains cas lorsqu’un accord de mobilité interne s’applique.
-
 f) Clause de dédit-formation
 Le salarié s’engage à rester un certain temps dans l’entreprise ou à rembourser les frais de formation si la formation a été financée par l’employeur.
 Conditions :
@@ -876,10 +874,8 @@ Il est possible en cas :
 - d’attente de suppression du poste dans les 24 mois ;
 - de remplacement d’un salarié temporairement passé à temps partiel.
 
-Le support précise qu’en pratique :
-- le salarié en CDD recruté pour un remplacement n’a pas forcément à occuper exactement le poste du salarié absent ;
-- il peut remplacer un autre salarié réaffecté en interne ;
-- il est recommandé de mentionner dans le CDD le nom et la qualification du salarié absent et du salarié effectivement remplacé.
+Le salarié en CDD recruté pour un remplacement n’a pas forcément à occuper exactement le poste du salarié absent.
+Il peut remplacer un autre salarié réaffecté en interne.
 
 b) Emplois saisonniers
 Il s’agit d’emplois dont les tâches se répètent chaque année en fonction :
@@ -925,13 +921,12 @@ g) Autres cas spécifiques
 Le support cite aussi :
 - le contrat de réinsertion ;
 - le contrat pour sportif ou entraîneur professionnel ;
-- le contrat pour joueur professionnel de jeux vidéo ;
-- certains remplacements dans le secteur agricole, entrepreneurial ou sociétaire.
+- le contrat pour joueur professionnel de jeux vidéo.
 
 4. Le contrat de chantier ou d’opération
-Le support mentionne, en “pour aller plus loin”, le contrat de chantier ou d’opération :
-- c’est un CDI ;
-- il permet de recruter pour un ouvrage ou des travaux précis dont la fin ne peut être exactement connue à l’avance ;
+Le contrat de chantier ou d’opération :
+- est un CDI ;
+- permet de recruter pour un ouvrage ou des travaux précis dont la fin ne peut être exactement connue à l’avance ;
 - sa rupture à la fin du chantier suit les règles du licenciement.
 
 5. Les règles générales du CDD
@@ -944,8 +939,6 @@ Mentions obligatoires essentielles :
 Il doit être transmis au salarié dans les 2 jours suivant l’embauche.
 À défaut d’écrit ou de mention essentielle :
 - requalification en CDI.
-
-Le support précise que l’absence de certaines mentions secondaires d’information n’entraîne pas nécessairement la requalification.
 
 6. Égalité de traitement
 Le salarié en CDD doit bénéficier d’une rémunération identique à celle d’un salarié en CDI :
@@ -983,8 +976,7 @@ Le délai de carence n’est pas exigé notamment :
 - pour les emplois saisonniers ;
 - pour les CDD d’usage ;
 - en cas de nouvelle absence du salarié remplacé ;
-- si le salarié recruté en remplacement est lui-même absent, rompt son contrat ou refuse son renouvellement ;
-- ou dans d’autres cas prévus par accord de branche étendu.
+- si le salarié recruté en remplacement est lui-même absent, rompt son contrat ou refuse son renouvellement.
 
 9. Fin du CDD
 a) Pendant la période d’essai
@@ -1021,9 +1013,6 @@ Si la rupture irrégulière vient de l’employeur :
 - le salarié a droit à des dommages et intérêts correspondant aux rémunérations qu’il aurait perçues jusqu’au terme ;
 - à l’indemnité de précarité ;
 - et à l’indemnisation d’un préjudice spécifique le cas échéant.
-
-En cas de rupture du CDD à la suite d’un sinistre :
-- le salarié a droit à une indemnité compensatrice égale aux rémunérations dues jusqu’au terme.
 
 11. Indemnité de précarité
 Le salarié en CDD a droit en principe à une indemnité de fin de contrat de 10 % de la rémunération brute totale.
@@ -1090,3 +1079,331 @@ Portage salarial :
   }
 ];
 
+const flashcards = [
+  {
+    question: "Quels sont les 3 critères de l’usage en droit du travail ?",
+    answer: "Généralité, constance et fixité."
+  },
+  {
+    question: "Le conseil de prud’hommes règle quel type de litiges ?",
+    answer: "Les litiges individuels nés à l’occasion d’un contrat de travail."
+  },
+  {
+    question: "L’inspecteur du travail peut-il entrer sans prévenir dans l’entreprise ?",
+    answer: "Oui, il dispose d’un droit de visite sans obligation d’information préalable."
+  },
+  {
+    question: "La DPAE doit être faite au plus tard quand ?",
+    answer: "Au plus tard la veille de l’embauche."
+  },
+  {
+    question: "Quel est l’élément central du contrat de travail ?",
+    answer: "Le lien de subordination."
+  },
+  {
+    question: "Le CDD est-il la forme normale du contrat de travail ?",
+    answer: "Non, c’est le CDI qui est la forme normale et générale."
+  },
+  {
+    question: "Quel est en principe le taux de l’indemnité de précarité ?",
+    answer: "10 % de la rémunération brute totale."
+  },
+  {
+    question: "Une clause de non-concurrence est-elle valable sans contrepartie financière ?",
+    answer: "Non, une contrepartie financière non dérisoire est nécessaire."
+  }
+];
+
+const quizQuestions = [
+  {
+    question: "La jurisprudence prime sur la loi.",
+    options: ["Vrai", "Faux"],
+    correct: 1,
+    explanation: "Faux. La jurisprudence interprète et précise la loi, mais ne prime pas sur elle."
+  },
+  {
+    question: "Le droit du travail est un compromis entre un impératif social et un impératif économique.",
+    options: ["Vrai", "Faux"],
+    correct: 0,
+    explanation: "Vrai. C’est une idée centrale de la fiche 1."
+  },
+  {
+    question: "Le conseil de prud’hommes traite principalement les litiges collectifs.",
+    options: ["Vrai", "Faux"],
+    correct: 1,
+    explanation: "Faux. Il est compétent pour les litiges individuels liés au contrat de travail."
+  },
+  {
+    question: "La phase de conciliation prud’homale est toujours obligatoire sans aucune exception.",
+    options: ["Vrai", "Faux"],
+    correct: 1,
+    explanation: "Faux. Il existe plusieurs exceptions, notamment la requalification de certains contrats."
+  },
+  {
+    question: "Faire obstacle à l’inspection du travail peut constituer un délit d’entrave.",
+    options: ["Vrai", "Faux"],
+    correct: 0,
+    explanation: "Vrai. Le support prévoit notamment une amende et une peine d’emprisonnement."
+  },
+  {
+    question: "Une offre d’emploi peut librement fixer un âge maximum.",
+    options: ["Vrai", "Faux"],
+    correct: 1,
+    explanation: "Faux. C’est en principe interdit, sauf texte particulier."
+  },
+  {
+    question: "Le lien de subordination est l’élément central du contrat de travail.",
+    options: ["Vrai", "Faux"],
+    correct: 0,
+    explanation: "Vrai. C’est le critère majeur retenu par la jurisprudence."
+  },
+  {
+    question: "Le CDD peut avoir pour objet de pourvoir durablement un emploi permanent.",
+    options: ["Vrai", "Faux"],
+    correct: 1,
+    explanation: "Faux. Le CDD ne doit pas pourvoir durablement un emploi lié à l’activité normale et permanente."
+  },
+  {
+    question: "Le salarié en CDD bénéficie en principe d’une indemnité de précarité.",
+    options: ["Vrai", "Faux"],
+    correct: 0,
+    explanation: "Vrai, sauf exceptions prévues par la loi."
+  },
+  {
+    question: "La clause d’exclusivité est toujours valable pour un salarié à temps partiel.",
+    options: ["Vrai", "Faux"],
+    correct: 1,
+    explanation: "Faux. Elle est en pratique très limitée, voire exclue à temps partiel."
+  }
+];
+
+let currentLesson = 0;
+let currentFlashcard = 0;
+let currentQuiz = 0;
+let score = 0;
+let selectedAnswer = null;
+
+const content = document.getElementById("content");
+const courseBtn = document.getElementById("courseBtn");
+const flashcardsBtn = document.getElementById("flashcardsBtn");
+const quizBtn = document.getElementById("quizBtn");
+
+function setActiveButton(activeBtn) {
+  [courseBtn, flashcardsBtn, quizBtn].forEach(btn => btn.classList.remove("active"));
+  activeBtn.classList.add("active");
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function formatText(text) {
+  return escapeHtml(text)
+    .replace(/\n/g, "<br>")
+    .replace(/- /g, "• ");
+}
+
+function renderLesson() {
+  const lesson = lessons[currentLesson];
+
+  content.innerHTML = `
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+        <h2 style="margin:0;">${lesson.title}</h2>
+        <span style="background:#e5edff; color:#2563eb; padding:6px 10px; border-radius:999px; font-size:14px;">
+          ${currentLesson + 1} / ${lessons.length}
+        </span>
+      </div>
+
+      <div style="line-height:1.7; white-space:normal; font-size:15px;">
+        ${formatText(lesson.content)}
+      </div>
+
+      <div style="display:flex; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap;">
+        <button id="prevLesson" ${currentLesson === 0 ? "disabled" : ""}>⬅ Précédent</button>
+        <button id="nextLesson" ${currentLesson === lessons.length - 1 ? "disabled" : ""}>Suivant ➡</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("prevLesson").addEventListener("click", () => {
+    if (currentLesson > 0) {
+      currentLesson--;
+      renderLesson();
+    }
+  });
+
+  document.getElementById("nextLesson").addEventListener("click", () => {
+    if (currentLesson < lessons.length - 1) {
+      currentLesson++;
+      renderLesson();
+    }
+  });
+}
+
+function renderFlashcard() {
+  const card = flashcards[currentFlashcard];
+
+  content.innerHTML = `
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+        <h2 style="margin:0;">Flashcards</h2>
+        <span style="background:#ede9fe; color:#6d28d9; padding:6px 10px; border-radius:999px; font-size:14px;">
+          ${currentFlashcard + 1} / ${flashcards.length}
+        </span>
+      </div>
+
+      <div id="flashcardBox" style="background:#f8fafc; border:1px solid #e5e7eb; border-radius:16px; padding:24px; min-height:180px; cursor:pointer;">
+        <h3 style="margin-top:0;">Question</h3>
+        <p style="font-size:18px;">${card.question}</p>
+        <div id="flashcardAnswer" style="display:none; margin-top:20px; padding-top:16px; border-top:1px solid #dbeafe;">
+          <h3>Réponse</h3>
+          <p>${card.answer}</p>
+        </div>
+        <p style="margin-top:18px; color:#6b7280; font-size:14px;">Clique sur la carte pour afficher / masquer la réponse.</p>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap;">
+        <button id="prevFlash" ${currentFlashcard === 0 ? "disabled" : ""}>⬅ Précédente</button>
+        <button id="nextFlash" ${currentFlashcard === flashcards.length - 1 ? "disabled" : ""}>Suivante ➡</button>
+      </div>
+    </div>
+  `;
+
+  const flashcardBox = document.getElementById("flashcardBox");
+  const answer = document.getElementById("flashcardAnswer");
+
+  flashcardBox.addEventListener("click", () => {
+    answer.style.display = answer.style.display === "none" ? "block" : "none";
+  });
+
+  document.getElementById("prevFlash").addEventListener("click", () => {
+    if (currentFlashcard > 0) {
+      currentFlashcard--;
+      renderFlashcard();
+    }
+  });
+
+  document.getElementById("nextFlash").addEventListener("click", () => {
+    if (currentFlashcard < flashcards.length - 1) {
+      currentFlashcard++;
+      renderFlashcard();
+    }
+  });
+}
+
+function renderQuiz() {
+  if (currentQuiz >= quizQuestions.length) {
+    const percentage = Math.round((score / quizQuestions.length) * 100);
+
+    content.innerHTML = `
+      <div class="card">
+        <h2>Résultat du quiz</h2>
+        <p style="font-size:18px;">Score : <strong>${score} / ${quizQuestions.length}</strong></p>
+        <p style="font-size:16px;">Réussite : ${percentage}%</p>
+        <button id="restartQuiz">Recommencer</button>
+      </div>
+    `;
+
+    document.getElementById("restartQuiz").addEventListener("click", () => {
+      currentQuiz = 0;
+      score = 0;
+      selectedAnswer = null;
+      renderQuiz();
+    });
+
+    return;
+  }
+
+  const q = quizQuestions[currentQuiz];
+
+  content.innerHTML = `
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+        <h2 style="margin:0;">Quiz</h2>
+        <span style="background:#dcfce7; color:#15803d; padding:6px 10px; border-radius:999px; font-size:14px;">
+          ${currentQuiz + 1} / ${quizQuestions.length}
+        </span>
+      </div>
+
+      <p style="font-size:18px; margin-bottom:20px;">${q.question}</p>
+
+      <div id="quizOptions" style="display:grid; gap:12px;">
+        ${q.options.map((option, index) => `
+          <button class="quiz-option" data-index="${index}" style="text-align:left;">
+            ${option}
+          </button>
+        `).join("")}
+      </div>
+
+      <div id="quizFeedback" style="margin-top:20px;"></div>
+
+      <div style="margin-top:24px;">
+        <button id="validateQuiz">Valider</button>
+      </div>
+    </div>
+  `;
+
+  const optionButtons = document.querySelectorAll(".quiz-option");
+  const feedback = document.getElementById("quizFeedback");
+  const validateBtn = document.getElementById("validateQuiz");
+
+  optionButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      optionButtons.forEach(b => b.style.outline = "none");
+      btn.style.outline = "2px solid #2563eb";
+      selectedAnswer = Number(btn.dataset.index);
+    });
+  });
+
+  validateBtn.addEventListener("click", () => {
+    if (selectedAnswer === null) {
+      feedback.innerHTML = `<p style="color:#dc2626;">Choisis une réponse avant de valider.</p>`;
+      return;
+    }
+
+    const isCorrect = selectedAnswer === q.correct;
+
+    if (isCorrect) score++;
+
+    feedback.innerHTML = `
+      <div style="padding:16px; border-radius:12px; background:${isCorrect ? "#ecfdf5" : "#fef2f2"}; border:1px solid ${isCorrect ? "#86efac" : "#fecaca"};">
+        <p style="margin-top:0; font-weight:600; color:${isCorrect ? "#15803d" : "#b91c1c"};">
+          ${isCorrect ? "Bonne réponse !" : "Mauvaise réponse."}
+        </p>
+        <p style="margin-bottom:0;">${q.explanation}</p>
+      </div>
+      <button id="nextQuiz" style="margin-top:16px;">${currentQuiz === quizQuestions.length - 1 ? "Voir le résultat" : "Question suivante"}</button>
+    `;
+
+    validateBtn.disabled = true;
+    optionButtons.forEach(btn => btn.disabled = true);
+
+    document.getElementById("nextQuiz").addEventListener("click", () => {
+      currentQuiz++;
+      selectedAnswer = null;
+      renderQuiz();
+    });
+  });
+}
+
+courseBtn.addEventListener("click", () => {
+  setActiveButton(courseBtn);
+  renderLesson();
+});
+
+flashcardsBtn.addEventListener("click", () => {
+  setActiveButton(flashcardsBtn);
+  renderFlashcard();
+});
+
+quizBtn.addEventListener("click", () => {
+  setActiveButton(quizBtn);
+  renderQuiz();
+});
+
+setActiveButton(courseBtn);
+renderLesson();
