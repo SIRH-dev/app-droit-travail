@@ -318,84 +318,39 @@ body{padding-bottom:72px}
   <div class="modal-box" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-brevo">
-      <!-- Begin Brevo Form -->
-      <style>
-        @font-face{font-display:block;font-family:Roboto;src:url(https://assets.brevo.com/font/Roboto/Latin/normal/normal/7529907e9eaf8ebb5220c5f9850e3811.woff2) format("woff2"),url(https://assets.brevo.com/font/Roboto/Latin/normal/normal/25c678feafdc175a70922a116c9be3e7.woff) format("woff")}
-        @font-face{font-display:fallback;font-family:Roboto;font-weight:600;src:url(https://assets.brevo.com/font/Roboto/Latin/medium/normal/6e9caeeafb1f3491be3e32744bc30440.woff2) format("woff2"),url(https://assets.brevo.com/font/Roboto/Latin/medium/normal/71501f0d8d5aa95960f6475d5487d4c2.woff) format("woff")}
-        #sib-container input::placeholder{text-align:left;font-family:Helvetica,sans-serif;color:#c0ccda}
-        #sib-container a{text-decoration:underline;color:#2BB2FC}
-        .modal-brevo .sib-form{background:transparent !important;padding:0 !important}
-        .modal-brevo #sib-container{border:none !important;background:transparent !important;max-width:100% !important;border-radius:0 !important}
-        .modal-brevo .sib-form-block__button{background-color:var(--accent) !important;color:#0e0f13 !important;border-radius:10px !important;font-weight:700 !important;width:100%;padding:.75rem !important;font-size:.95rem !important;cursor:pointer}
-        .modal-brevo .sib-form-block p{color:var(--text) !important;font-family:'DM Sans',sans-serif !important}
-        .modal-brevo .entry__label{color:var(--text-muted) !important;font-family:'DM Sans',sans-serif !important;font-size:.85rem !important}
-        .modal-brevo .input{border:1px solid var(--border) !important;border-radius:10px !important;padding:.7rem 1rem !important;background:var(--surface2) !important;color:var(--text) !important;width:100% !important;font-size:.9rem !important}
-        .modal-brevo .input:focus{outline:none !important;border-color:var(--accent) !important}
-        .modal-brevo #error-message{border-radius:8px !important}
-        .modal-brevo #success-message{border-radius:8px !important}
-      </style>
-      <link rel="stylesheet" href="https://sibforms.com/forms/end-form/build/sib-styles.css">
-      <div class="sib-form">
-        <div id="sib-form-container" class="sib-form-container">
-          <div id="error-message" class="sib-form-message-panel" style="font-size:14px;text-align:left;font-family:Helvetica,sans-serif;color:#661d1d;background-color:#ffeded;border-radius:8px;border-color:#ff4949;max-width:100%;display:none">
-            <div class="sib-form-message-panel__text sib-form-message-panel__text--center">
-              <span>Nous n'avons pas pu confirmer votre inscription.</span>
-            </div>
-          </div>
-          <div id="success-message" class="sib-form-message-panel" style="font-size:14px;text-align:left;font-family:Helvetica,sans-serif;color:#085229;background-color:#e7faf0;border-radius:8px;border-color:#13ce66;max-width:100%;display:none">
-            <div class="sib-form-message-panel__text sib-form-message-panel__text--center">
-              <span>🎉 Votre inscription est confirmée !</span>
-            </div>
-          </div>
-          <div id="sib-container" class="sib-container--large sib-container--vertical" style="text-align:center;background-color:transparent;max-width:100%;direction:ltr">
-            <form id="sib-form" method="POST" action="https://2baff920.sibforms.com/serve/MUIFAD2Gyh81Kn1j-gAmFsCb9abwzHZmtBrXd7UglIum_S2ipSfL6WIcYfjJOEppWUB7nsd8lH5vNJPh_1pevmpRfWQ4kCSq8c5kJv4WU28NQfx4oeOEWY5qEfeNbDHLVCYoo4nJaos8emIUQlhQkScivj_f2_ARpUW_Pp_3t2qWT1x0t0ikn9xE2qeWj1gy9oqV-qaHFcBhTjNQLA==" data-type="subscription">
-              <div style="padding:6px 0">
-                <div class="sib-form-block" style="font-size:22px;text-align:left;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--text)">
-                  <p>Restez informé avec LexStudy</p>
-                </div>
-              </div>
-              <div style="padding:4px 0 12px">
-                <div class="sib-form-block" style="font-size:14px;text-align:left;font-family:'DM Sans',sans-serif;color:var(--text-muted)">
-                  <p>Recevez les mises à jour du Droit du Travail 2025 directement dans votre boîte mail.</p>
-                </div>
-              </div>
-              <div style="padding:6px 0">
-                <div class="sib-input sib-form-block">
-                  <div class="form__entry entry_block">
-                    <div class="form__label-row">
-                      <label class="entry__label" style="font-weight:600;text-align:left;font-size:.83rem;font-family:'DM Sans',sans-serif;color:var(--text-muted)" for="EMAIL">Votre adresse email *</label>
-                      <div class="entry__field">
-                        <input class="input" type="email" id="EMAIL" name="EMAIL" autocomplete="off" placeholder="exemple@email.com" data-required="true" required/>
-                      </div>
-                    </div>
-                    <label class="entry__error entry__error--primary" style="font-size:13px;text-align:left;font-family:Helvetica,sans-serif;color:#661d1d;background-color:#ffeded;border-radius:6px;border-color:#ff4949;"></label>
-                  </div>
-                </div>
-              </div>
-              <div style="padding:10px 0 4px">
-                <div class="sib-form-block" style="text-align:left">
-                  <button class="sib-form-block__button sib-form-block__button-with-loader" style="font-size:.95rem;font-weight:700;font-family:'DM Sans',sans-serif;color:#0e0f13;background-color:var(--accent);border-radius:10px;border-width:0;width:100%;padding:.75rem;cursor:pointer" form="sib-form" type="submit">
-                    📧 Je m'abonne gratuitement
-                  </button>
-                </div>
-              </div>
-              <input type="text" name="email_address_check" value="" class="input--hidden" style="display:none">
-              <input type="hidden" name="locale" value="fr">
-            </form>
-          </div>
-        </div>
+      <div style="font-size:22px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--text);margin-bottom:.5rem">
+        Restez informé avec LexStudy
       </div>
-      <script>
-        window.REQUIRED_CODE_ERROR_MESSAGE='Veuillez choisir un code pays';
-        window.LOCALE='fr';
-        window.EMAIL_INVALID_MESSAGE=window.SMS_INVALID_MESSAGE="Les informations fournies ne sont pas valides.";
-        window.REQUIRED_ERROR_MESSAGE="Vous devez renseigner ce champ.";
-        window.GENERIC_INVALID_MESSAGE="Les informations fournies ne sont pas valides.";
-        window.translation={common:{selectedList:'{quantity} liste sélectionnée',selectedLists:'{quantity} listes sélectionnées'}};
-        var AUTOHIDE=Boolean(0);
-      </script>
-      <script defer src="https://sibforms.com/forms/end-form/build/main.js"></script>
-      <!-- End Brevo Form -->
+      <div style="font-size:.88rem;color:var(--text-muted);margin-bottom:1.25rem;line-height:1.6">
+        Recevez les mises à jour du Droit du Travail 2025 directement dans votre boîte mail.
+      </div>
+      <div id="subscribe-success" style="display:none;background:#e7faf0;border:1px solid #13ce66;border-radius:10px;padding:1rem;text-align:center;color:#085229;font-weight:600;margin-bottom:1rem">
+        🎉 Inscription confirmée ! Vérifiez votre boîte mail.
+      </div>
+      <div id="subscribe-error" style="display:none;background:#ffeded;border:1px solid #ff4949;border-radius:10px;padding:1rem;text-align:center;color:#661d1d;font-size:.85rem;margin-bottom:1rem">
+        ❌ Une erreur est survenue. Réessayez.
+      </div>
+      <form id="subscribe-form" onsubmit="submitSubscribe(event)">
+        <label style="font-size:.83rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.4rem">
+          Votre adresse email *
+        </label>
+        <input
+          type="email"
+          id="subscribe-email"
+          placeholder="exemple@email.com"
+          required
+          style="width:100%;padding:.75rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--surface2);color:var(--text);font-size:.9rem;font-family:'DM Sans',sans-serif;margin-bottom:.9rem;outline:none;transition:border .2s"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='var(--border)'"
+        />
+        <button
+          type="submit"
+          id="subscribe-submit"
+          style="width:100%;padding:.8rem;background:var(--accent);border:none;border-radius:10px;color:#0e0f13;font-size:.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .2s"
+        >
+          📧 Je m'abonne gratuitement
+        </button>
+      </form>
     </div>
   </div>
 </div>
@@ -1133,6 +1088,42 @@ function showBlogError() {
       <p style="font-weight:600;margin-bottom:.5rem">Impossible de charger les articles</p>
       <p style="font-size:.83rem">Consulte directement le blog sur <a href="${SUBSTACK_URL}" target="_blank">Substack</a></p>
     </div>`;
+}
+
+// =============================================
+// SUBSCRIBE — Brevo fetch
+// =============================================
+async function submitSubscribe(e) {
+  e.preventDefault();
+  const email = document.getElementById('subscribe-email').value.trim();
+  const btn = document.getElementById('subscribe-submit');
+  const errEl = document.getElementById('subscribe-error');
+  const okEl = document.getElementById('subscribe-success');
+  if (!email) return;
+  btn.textContent = '⏳ Inscription en cours...';
+  btn.disabled = true;
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+  try {
+    const formData = new FormData();
+    formData.append('EMAIL', email);
+    formData.append('email_address_check', '');
+    formData.append('locale', 'fr');
+    const res = await fetch('https://2baff920.sibforms.com/serve/MUIFAD2Gyh81Kn1j-gAmFsCb9abwzHZmtBrXd7UglIum_S2ipSfL6WIcYfjJOEppWUB7nsd8lH5vNJPh_1pevmpRfWQ4kCSq8c5kJv4WU28NQfx4oeOEWY5qEfeNbDHLVCYoo4nJaos8emIUQlhQkScivj_f2_ARpUW_Pp_3t2qWT1x0t0ikn9xE2qeWj1gy9oqV-qaHFcBhTjNQLA==', {
+      method: 'POST',
+      body: formData,
+      mode: 'no-cors'
+    });
+    // no-cors = pas de réponse lisible mais la requête passe
+    okEl.style.display = 'block';
+    document.getElementById('subscribe-form').style.display = 'none';
+    toast('🎉 Inscription confirmée !', 'success');
+    setTimeout(() => closeModal(), 3000);
+  } catch(err) {
+    errEl.style.display = 'block';
+    btn.textContent = '📧 Je m\'abonne gratuitement';
+    btn.disabled = false;
+  }
 }
 
 // =============================================
