@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Révision Droit du travail</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>📘 Droit du travail</h1>
+      <p class="subtitle">Application de révision</p>
+
+      <button class="nav-btn active" data-view="cours">Cours</button>
+      <button class="nav-btn" data-view="flashcards">Flashcards</button>
+      <button class="nav-btn" data-view="quiz">Quiz</button>
+    </aside>
+
+    <main class="content">
+      <section id="cours" class="view active">
+        <h2>Fiches de révision</h2>
+        <div id="lesson-list" class="card-grid"></div>
+      </section>
+
+      <section id="flashcards" class="view">
+        <h2>Flashcards</h2>
+        <div class="flashcard-box">
+          <div id="flashcard" class="flashcard">Clique sur "Afficher la réponse"</div>
+          <div class="flash-actions">
+            <button id="show-answer">Afficher la réponse</button>
+            <button id="next-card">Carte suivante</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="quiz" class="view">
+        <h2>Quiz</h2>
+        <div class="quiz-box">
+          <p id="question">Question en chargement...</p>
+          <div id="answers" class="answers"></div>
+          <p id="result"></p>
+          <button id="next-question">Question suivante</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
