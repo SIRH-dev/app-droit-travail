@@ -115,6 +115,20 @@ body{padding-bottom:72px}
 .btn-next-fiche{margin-left:auto;background:var(--accent);border:none;color:#0e0f13;padding:.4rem 1rem;border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s;font-family:'DM Sans',sans-serif;white-space:nowrap}
 .btn-next-fiche:hover{opacity:.85}
 
+/* ===== BANDEAU MISE À JOUR ===== */
+.fiche-update-bar{margin-top:1.25rem;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.fiche-update-btn{width:100%;background:var(--surface2);border:none;color:var(--text-muted);padding:.75rem 1rem;cursor:pointer;font-size:.82rem;font-family:'DM Sans',sans-serif;text-align:left;transition:all .2s;display:flex;align-items:center;justify-content:space-between}
+.fiche-update-btn:hover{background:var(--surface3);color:var(--text)}
+.fiche-update-btn.loading{cursor:not-allowed;opacity:.7}
+.fiche-update-result{padding:1rem;font-size:.83rem;line-height:1.7;display:none}
+.fiche-update-result.show{display:block}
+.fiche-update-result.ok{background:rgba(123,255,184,.07);border-top:1px solid var(--correct);color:var(--text)}
+.fiche-update-result.warn{background:rgba(232,201,110,.07);border-top:1px solid var(--accent);color:var(--text)}
+.fiche-update-result h1,.fiche-update-result h2,.fiche-update-result h3{font-size:.9rem;font-weight:700;margin:.75rem 0 .35rem;color:var(--accent)}
+.fiche-update-result ul{padding-left:1.2rem;margin:.4rem 0}
+.fiche-update-result li{margin-bottom:.3rem}
+.fiche-update-result strong{color:var(--accent)}
+
 .fiche-content{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;line-height:1.8;font-size:.92rem}
 @media(min-width:600px){.fiche-content{padding:2rem}}
 .fiche-content h2{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--accent);margin-bottom:1.25rem;line-height:1.3}
@@ -846,6 +860,55 @@ function renderFiche(){
     if(S.currentFiche<FICHES.length-1){S.currentFiche++;renderFiche();window.scrollTo(0,0);}
     else{toast('🎉 Toutes les fiches lues !','success');showScreen('fiches');}
   };
+  // Bandeau mise à jour
+  const updateBar = document.createElement('div');
+  updateBar.className = 'fiche-update-bar';
+  updateBar.innerHTML = `
+    <button class="fiche-update-btn" id="update-btn-${f.num}" onclick="checkFicheUpdate(${f.num-1})">
+      Vérifier la mise à jour des informations
+      <span id="update-arrow-${f.num}">→</span>
+    </button>
+    <div class="fiche-update-result" id="update-result-${f.num}"></div>
+  `;
+  document.getElementById('fiche-content-area').appendChild(updateBar);
+}
+
+async function checkFicheUpdate(idx) {
+  const f = FICHES[idx];
+  const btn = document.getElementById(`update-btn-${f.num}`);
+  const result = document.getElementById(`update-result-${f.num}`);
+  const arrow = document.getElementById(`update-arrow-${f.num}`);
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  arrow.textContent = '⏳';
+
+  const content = f.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 2000);
+
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{
+          role: 'user',
+          content: `Tu es un expert en droit du travail français. Vérifie si le contenu de cette fiche est toujours à jour en 2026 en cherchant sur le web les éventuelles modifications législatives récentes.\n\nFiche : "${f.title}"\n\nContenu actuel :\n${content}\n\nRéponds en français avec :\n1. Un statut clair : ✅ À jour ou ⚠️ Modifications détectées\n2. Si des modifications existent, liste-les précisément avec les nouvelles valeurs\n3. Cite tes sources`
+        }]
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'Impossible de vérifier.';
+    const isWarn = reply.includes('⚠') || reply.toLowerCase().includes('modification');
+    result.className = `fiche-update-result show ${isWarn ? 'warn' : 'ok'}`;
+    result.innerHTML = marked.parse(reply);
+    arrow.textContent = isWarn ? '⚠️' : '✅';
+  } catch(e) {
+    result.className = 'fiche-update-result show warn';
+    result.innerHTML = '❌ Erreur de connexion.';
+    arrow.textContent = '❌';
+  }
+  btn.classList.remove('loading');
+  btn.disabled = false;
 }
 
 // =============================================
