@@ -1609,5 +1609,19 @@ async function checkVeille() {
   btn.textContent = '🔍 Analyser';
 }
 </script>
+
+<!-- PREMIUM MODAL -->
+<div class="premium-overlay" id="premium-overlay">
+  <div class="premium-box">
+    <button class="premium-close" onclick="closePremium()">✕</button>
+    <div class="premium-title">Fonctionnalité Premium</div>
+    <div class="premium-desc">Cette fonctionnalité est réservée aux membres. Soutenez le projet pour 3€/mois et recevez votre code d'accès instantanément.</div>
+    <input type="text" class="premium-input" id="premium-code-input" placeholder="DROIT-XXXX-XXXX" maxlength="15"/>
+    <div class="premium-error" id="premium-error"></div>
+    <button class="premium-submit" id="premium-submit" onclick="submitPremiumCode()">Activer mon accès</button>
+    <div class="premium-kofi">Pas encore membre ? <a href="https://ko-fi.com/ledroitdutravailfacile" target="_blank">Soutenir sur Ko-fi</a></div>
+  </div>
+</div>
+
 </body>
 </html>
