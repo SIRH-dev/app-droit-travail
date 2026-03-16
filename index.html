@@ -339,7 +339,7 @@ body{padding-bottom:72px}
       <button class="top-nav-tab" onclick="showScreen('quiz')">🎯 Quiz</button>
       <button class="top-nav-tab" onclick="showScreen('recap')">📋 Récap</button>
       <button class="top-nav-tab" onclick="showScreen('blog')">✍️ Blog</button>
-      <button class="top-nav-tab" onclick="showScreen('chat')">⚖️ Juriste <span class="premium-badge">Premium</span></button>
+      <button class="top-nav-tab" onclick="showScreen('chat')">⚖️ Juriste</button>
     </nav>
     <div class="header-actions">
       <button class="subscribe-btn" onclick="openModal()">📧 S'abonner</button>
@@ -1632,18 +1632,10 @@ async function checkVeille() {
     <input type="text" class="premium-input" id="premium-code-input" placeholder="DROIT-XXXX-XXXX" maxlength="15"/>
     <div class="premium-error" id="premium-error"></div>
     <button class="premium-submit" id="premium-submit" onclick="submitPremiumCode()">Activer mon accès</button>
-    <div class="premium-kofi" style="text-align:center;margin-top:.5rem">
-      <p style="margin-bottom:.75rem;font-size:.82rem;color:var(--text-muted)">Pas encore membre ? Soutenez le projet pour recevoir votre code :</p>
-      <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-      <script type='text/javascript'>kofiwidget2.init('Soutenir le projet', '#73e2f5', 'W7W01W3Z5O');kofiwidget2.draw();</script>
-    </div>
+    <div class="premium-kofi">Pas encore membre ? <a href="https://ko-fi.com/W7W01W3Z5O" target="_blank">Se connecter à Ko-fi</a></div>
   </div>
 </div>
 
-<script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-<script type='text/javascript'>
-kofiwidget2.init('Soutenir le projet', '#73e2f5', 'W7W01W3Z5O');
-// Ne pas dessiner automatiquement, on le fait dans la modal
-</script>
+
 </body>
 </html>
