@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>LexStudy — Droit du Travail</title>
+<title>Le Droit du Travail Facile</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ===== THEMES ===== */
@@ -296,7 +296,7 @@ body{padding-bottom:72px}
 <!-- HEADER -->
 <header class="header">
   <div class="header-inner">
-    <div class="logo">⚖️ LexStudy <span>Droit du Travail</span></div>
+    <div class="logo">⚖️ Le Droit du Travail Facile</div>
     <nav class="top-nav">
       <button class="top-nav-tab active" onclick="showScreen('home')">Accueil</button>
       <button class="top-nav-tab" onclick="showScreen('fiches')">📚 Fiches</button>
@@ -320,7 +320,7 @@ body{padding-bottom:72px}
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-brevo">
       <div style="font-size:22px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--text);margin-bottom:.5rem">
-        Restez informé avec LexStudy
+        Restez informé avec Le Droit du Travail Facile
       </div>
       <div style="font-size:.88rem;color:var(--text-muted);margin-bottom:1.25rem;line-height:1.6">
         Recevez les mises à jour du Droit du Travail directement dans votre boîte mail.
@@ -1267,29 +1267,13 @@ renderRecap();
         <button class="chat-send-btn" onclick="sendChat()" id="chat-send">➤</button>
       </div>
     </div>
-    <div class="veille-panel">
-      <div class="veille-header">
-        <div class="chat-panel-title">🔍 Veille Législative</div>
-        <div class="chat-panel-sub">Vérifiez si vos fiches sont à jour avec la législation 2025</div>
-      </div>
-      <div class="veille-select-row">
-        <select id="veille-fiche-select" class="veille-select">
-          <option value="">-- Choisir une fiche --</option>
-        </select>
-        <button class="veille-btn" onclick="checkVeille()" id="veille-btn">🔍 Analyser</button>
-      </div>
-      <div id="veille-result" class="veille-result" style="display:none"></div>
-      <div class="veille-info">
-        <div class="veille-info-title">ℹ️ Comment ça fonctionne ?</div>
-        <p>L'IA analyse la fiche sélectionnée et vérifie si des éléments pourraient avoir évolué depuis la publication du manuel Dunod 2025.</p>
-      </div>
-    </div>
+
   </div>
 </div>
 
 <style>
 /* ===== CHAT ===== */
-.chat-container{max-width:1100px;margin:0 auto;padding:1rem;display:grid;grid-template-columns:1fr;gap:1rem}
+.chat-container{max-width:760px;margin:0 auto;padding:1rem}
 @media(min-width:768px){.chat-container{grid-template-columns:1fr 1fr}}
 .chat-panel,.veille-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
 .chat-panel-header{display:flex;align-items:flex-start;justify-content:space-between;padding:1.1rem 1.1rem .75rem;border-bottom:1px solid var(--border);gap:.5rem}
