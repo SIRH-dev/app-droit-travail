@@ -1355,12 +1355,20 @@ async function sendChat() {
       body: JSON.stringify({ messages: chatHistory })
     });
     const data = await res.json();
+    if (!res.ok || data.error) {
+      const errMsg = JSON.stringify(data.error || data);
+      typingDiv.querySelector('.chat-bubble').textContent = '❌ Erreur : ' + errMsg;
+      typingDiv.querySelector('.chat-bubble').classList.remove('typing');
+      btn.disabled = false;
+      input.focus();
+      return;
+    }
     const reply = data.content?.[0]?.text || "Désolé, je n'ai pas pu répondre.";
     typingDiv.querySelector('.chat-bubble').textContent = reply;
     typingDiv.querySelector('.chat-bubble').classList.remove('typing');
     chatHistory.push({ role: 'assistant', content: reply });
   } catch(e) {
-    typingDiv.querySelector('.chat-bubble').textContent = '❌ Erreur de connexion. Réessayez.';
+    typingDiv.querySelector('.chat-bubble').textContent = '❌ Erreur de connexion : ' + e.message;
   }
   btn.disabled = false;
   input.focus();
