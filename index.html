@@ -1632,9 +1632,10 @@ async function checkVeille() {
     <input type="text" class="premium-input" id="premium-code-input" placeholder="DROIT-XXXX-XXXX" maxlength="15"/>
     <div class="premium-error" id="premium-error"></div>
     <button class="premium-submit" id="premium-submit" onclick="submitPremiumCode()">Activer mon accès</button>
-    <div class="premium-kofi">
-      <p style="margin-bottom:.75rem">Pas encore membre ? Soutenez le projet pour recevoir votre code :</p>
-      <div id="kofi-btn-container"></div>
+    <div class="premium-kofi" style="text-align:center;margin-top:.5rem">
+      <p style="margin-bottom:.75rem;font-size:.82rem;color:var(--text-muted)">Pas encore membre ? Soutenez le projet pour recevoir votre code :</p>
+      <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+      <script type='text/javascript'>kofiwidget2.init('Soutenir le projet', '#73e2f5', 'W7W01W3Z5O');kofiwidget2.draw();</script>
     </div>
   </div>
 </div>
