@@ -535,6 +535,80 @@ body{padding-bottom:72px}
 
 <script>
 // =============================================
+// SYSTEME PREMIUM
+// =============================================
+const PREMIUM_KEY = 'premium_access';
+let pendingPremiumAction = null;
+
+function isPremium() {
+  const data = JSON.parse(localStorage.getItem(PREMIUM_KEY) || 'null');
+  if (!data) return false;
+  if (Date.now() > data.expiry) { localStorage.removeItem(PREMIUM_KEY); return false; }
+  return true;
+}
+
+function openPremium(action) {
+  pendingPremiumAction = action;
+  document.getElementById('premium-overlay').classList.add('open');
+  document.getElementById('premium-code-input').value = '';
+  document.getElementById('premium-error').style.display = 'none';
+  document.getElementById('premium-code-input').focus();
+}
+
+function closePremium() {
+  document.getElementById('premium-overlay').classList.remove('open');
+  pendingPremiumAction = null;
+}
+
+async function submitPremiumCode() {
+  const code = document.getElementById('premium-code-input').value.trim().toUpperCase();
+  const btn = document.getElementById('premium-submit');
+  const err = document.getElementById('premium-error');
+
+  if (!code) { err.textContent = 'Veuillez entrer un code.'; err.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Vérification...';
+  err.style.display = 'none';
+
+  try {
+    const res = await fetch('https://lexstudy-api.kpnonon.workers.dev/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await res.json();
+
+    if (data.valid) {
+      localStorage.setItem(PREMIUM_KEY, JSON.stringify({ expiry: data.expiry }));
+      closePremium();
+      toast('Accès Premium activé !');
+      if (pendingPremiumAction) pendingPremiumAction();
+    } else {
+      err.textContent = data.reason || 'Code invalide. Vérifiez et réessayez.';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Erreur de connexion. Réessayez.';
+    err.style.display = 'block';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Activer mon accès';
+}
+
+function requirePremium(action) {
+  if (isPremium()) { action(); return; }
+  openPremium(action);
+}
+
+document.getElementById('premium-code-input')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitPremiumCode();
+});
+</script>
+
+<script>
+// =============================================
 // DATA — FICHES
 // =============================================
 const FICHES = [
@@ -1401,79 +1475,7 @@ renderRecap();
 </style>
 
 
-<script>
-// =============================================
-// SYSTEME PREMIUM
-// =============================================
-const PREMIUM_KEY = 'premium_access';
-let pendingPremiumAction = null;
 
-function isPremium() {
-  const data = JSON.parse(localStorage.getItem(PREMIUM_KEY) || 'null');
-  if (!data) return false;
-  if (Date.now() > data.expiry) { localStorage.removeItem(PREMIUM_KEY); return false; }
-  return true;
-}
-
-function openPremium(action) {
-  pendingPremiumAction = action;
-  document.getElementById('premium-overlay').classList.add('open');
-  document.getElementById('premium-code-input').value = '';
-  document.getElementById('premium-error').style.display = 'none';
-  document.getElementById('premium-code-input').focus();
-}
-
-function closePremium() {
-  document.getElementById('premium-overlay').classList.remove('open');
-  pendingPremiumAction = null;
-}
-
-async function submitPremiumCode() {
-  const code = document.getElementById('premium-code-input').value.trim().toUpperCase();
-  const btn = document.getElementById('premium-submit');
-  const err = document.getElementById('premium-error');
-
-  if (!code) { err.textContent = 'Veuillez entrer un code.'; err.style.display = 'block'; return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Vérification...';
-  err.style.display = 'none';
-
-  try {
-    const res = await fetch('https://lexstudy-api.kpnonon.workers.dev/verify-code', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
-    });
-    const data = await res.json();
-
-    if (data.valid) {
-      localStorage.setItem(PREMIUM_KEY, JSON.stringify({ expiry: data.expiry }));
-      closePremium();
-      toast('Accès Premium activé !');
-      if (pendingPremiumAction) pendingPremiumAction();
-    } else {
-      err.textContent = data.reason || 'Code invalide. Vérifiez et réessayez.';
-      err.style.display = 'block';
-    }
-  } catch(e) {
-    err.textContent = 'Erreur de connexion. Réessayez.';
-    err.style.display = 'block';
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Activer mon accès';
-}
-
-function requirePremium(action) {
-  if (isPremium()) { action(); return; }
-  openPremium(action);
-}
-
-document.getElementById('premium-code-input')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitPremiumCode();
-});
-</script>
 
 <script>
 // =============================================
