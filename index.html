@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Le Droit du Travail Facile</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
 /* ===== THEMES ===== */
 [data-theme="dark"] {
@@ -1364,7 +1365,7 @@ async function sendChat() {
       return;
     }
     const reply = data.content?.[0]?.text || "Désolé, je n'ai pas pu répondre.";
-    typingDiv.querySelector('.chat-bubble').textContent = reply;
+    typingDiv.querySelector('.chat-bubble').innerHTML = marked.parse(reply);
     typingDiv.querySelector('.chat-bubble').classList.remove('typing');
     chatHistory.push({ role: 'assistant', content: reply });
   } catch(e) {
