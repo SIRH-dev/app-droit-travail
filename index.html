@@ -343,6 +343,7 @@ body{padding-bottom:72px}
     </nav>
     <div class="header-actions">
       <button class="subscribe-btn" onclick="openModal()">📧 S'abonner</button>
+      <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Soutenir le projet', '#73e2f5', 'W7W01W3Z5O');kofiwidget2.draw();</script>
       <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Changer le thème">🌙</button>
       <div class="progress-chip" id="global-progress">0/28</div>
     </div>
@@ -888,7 +889,19 @@ function showScreen(name){
   if(name==='recap') renderRecap();
   if(name==='home') updateHome();
   if(name==='blog') loadBlog();
-  if(name==='chat') initVeille();
+  if(name==='chat'){
+    if(!isPremium()){
+      // Revenir à l'écran précédent et ouvrir le popup
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      document.getElementById('screen-home').classList.add('active');
+      document.querySelectorAll('.top-nav-tab,.bottom-nav-item').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.top-nav-tab')[0]?.classList.add('active');
+      document.querySelectorAll('.bottom-nav-item')[0]?.classList.add('active');
+      openPremium(()=>showScreen('chat'));
+      return;
+    }
+    initVeille();
+  }
   window.scrollTo(0,0);
 }
 
