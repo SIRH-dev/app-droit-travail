@@ -1,122 +1,779 @@
-const WORKER_URL = 'https://lexstudy-api.kpnonon.workers.dev';
+// =============================================
+// SYSTEME PREMIUM
+// =============================================
+const PREMIUM_KEY = 'premium_access';
+let pendingPremiumAction = null;
 
-// ETAT GLOBAL
-let state = {
-  readFiches: JSON.parse(localStorage.getItem('readFiches')) || [],
-};
+function isPremium() {
+  const data = JSON.parse(localStorage.getItem(PREMIUM_KEY) || 'null');
+  if (!data) return false;
+  if (Date.now() > data.expiry) { localStorage.removeItem(PREMIUM_KEY); return false; }
+  return true;
+}
 
-// INITIALISATION
-document.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('site_access') !== 'true') {
-    document.getElementById('modal-overlay').classList.add('open');
+function openPremium(action) {
+  pendingPremiumAction = action;
+  document.getElementById('premium-overlay').classList.add('open');
+  document.getElementById('premium-code-input').value = '';
+  document.getElementById('premium-error').style.display = 'none';
+  document.getElementById('premium-code-input').focus();
+  // Dessiner le bouton Ko-fi dans la modal
+  const container = document.getElementById('kofi-btn-container');
+  if (container && container.innerHTML === '') {
+    kofiwidget2.draw();
+    const kofiEl = document.querySelector('.kofi-button-container');
+    if (kofiEl) container.appendChild(kofiEl);
   }
-  updateStats();
+}
+
+function closePremium() {
+  document.getElementById('premium-overlay').classList.remove('open');
+  pendingPremiumAction = null;
+}
+
+async function submitPremiumCode() {
+  const code = document.getElementById('premium-code-input').value.trim().toUpperCase();
+  const btn = document.getElementById('premium-submit');
+  const err = document.getElementById('premium-error');
+
+  if (!code) { err.textContent = 'Veuillez entrer un code.'; err.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Vérification...';
+  err.style.display = 'none';
+
+  try {
+    const res = await fetch('https://lexstudy-api.kpnonon.workers.dev/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await res.json();
+
+    if (data.valid) {
+      localStorage.setItem(PREMIUM_KEY, JSON.stringify({ expiry: data.expiry }));
+      closePremium();
+      toast('Accès Premium activé !');
+      if (pendingPremiumAction) pendingPremiumAction();
+    } else {
+      err.textContent = data.reason || 'Code invalide. Vérifiez et réessayez.';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Erreur de connexion. Réessayez.';
+    err.style.display = 'block';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Activer mon accès';
+}
+
+function requirePremium(action) {
+  if (isPremium()) { action(); return; }
+  openPremium(action);
+}
+
+document.getElementById('premium-code-input')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitPremiumCode();
 });
 
-// NAVIGATION ENTRE LES ÉCRANS
-function showScreen(name) {
-  // On cache tout
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  // On affiche l'écran demandé
-  const target = document.getElementById('screen-' + name);
-  if (target) {
-    target.classList.add('active');
-    window.location.hash = name;
-  }
-  
-  if (name === 'fiches') renderFichesList();
+
+// =============================================
+// STATE
+// =============================================
+const S = {
+  completedFiches: JSON.parse(localStorage.getItem('ls_fiches')||'[]'),
+  srData: JSON.parse(localStorage.getItem('ls_sr')||'{}'),
+  bestScore: JSON.parse(localStorage.getItem('ls_score')||'null'),
+  currentFiche: 0,
+  currentCard: 0,
+  cardFlipped: false,
+  currentQ: 0,
+  quizScore: 0,
+  quizAnswered: false,
+  quizDone: false,
+  quizFilter: 'all',
+  fcFilter: 'all',
+  activeCards: [...FLASHCARDS.map((_,i)=>i)]
+};
+
+function save(){
+  localStorage.setItem('ls_fiches',JSON.stringify(S.completedFiches));
+  localStorage.setItem('ls_sr',JSON.stringify(S.srData));
+  if(S.bestScore!==null) localStorage.setItem('ls_score',JSON.stringify(S.bestScore));
 }
 
-// AFFICHAGE DES FICHES (Utilise data.js)
-function renderFichesList() {
-  const container = document.getElementById('fiches-list');
-  if (!container) return;
-  
-  container.innerHTML = '<div class="fiches-row"></div>';
-  const row = container.querySelector('.fiches-row');
+// SR helpers
+function getSRStatus(i){return S.srData[i]||'new'}
+function getSRCounts(){
+  let n=0,l=0,k=0;
+  FLASHCARDS.forEach((_,i)=>{const s=getSRStatus(i);if(s==='new')n++;else if(s==='learning')l++;else k++;});
+  return{n,l,k};
+}
 
-  FICHES.forEach(f => {
-    const isRead = state.readFiches.includes(f.num);
-    const card = document.createElement('div');
-    card.className = 'fiche-card';
-    card.onclick = () => openFiche(f.num);
-    card.innerHTML = `
-      <span class="fiche-number">FICHE ${f.num}</span>
-      <div class="fiche-title">${f.title}</div>
-      ${isRead ? '<div class="fiche-done-badge">✓ LUE</div>' : ''}
-    `;
-    row.appendChild(card);
+// =============================================
+// NAVIGATION
+// =============================================
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.top-nav-tab,.bottom-nav-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  const map={home:0,fiches:1,flashcards:2,quiz:3,recap:4,blog:5,chat:6};
+  if(map[name]!==undefined){
+    document.querySelectorAll('.top-nav-tab')[map[name]]?.classList.add('active');
+    document.querySelectorAll('.bottom-nav-item')[map[name]]?.classList.add('active');
+  }
+  if(name==='fiches') renderFichesList();
+  if(name==='flashcards') initFlashcards();
+  if(name==='quiz') initQuiz();
+  if(name==='recap') renderRecap();
+  if(name==='home') updateHome();
+  if(name==='blog') loadBlog();
+  if(name==='chat'){
+    if(!isPremium()){
+      openPremium(()=>showScreen('chat'));
+      return;
+    }
+    initVeille();
+  }
+  window.scrollTo(0,0);
+}
+
+// =============================================
+// HOME
+// =============================================
+function updateHome(){
+  document.getElementById('stat-fiches').textContent=S.completedFiches.length;
+  const {k}=getSRCounts();
+  document.getElementById('stat-known').textContent=k;
+  document.getElementById('stat-quiz').textContent=S.bestScore!==null?S.bestScore+'%':'—';
+  document.getElementById('global-progress').textContent=S.completedFiches.length+'/28';
+}
+
+// =============================================
+// FICHES
+// =============================================
+const PARTIES=[
+  {label:"Partie 1 — Sources et contrôle",range:[1,3]},
+  {label:"Partie 2 — Embauche et contrats",range:[4,6]},
+  {label:"Partie 3 — Exécution du contrat",range:[7,12]},
+  {label:"Partie 4 — Modification et suspension",range:[13,14]},
+  {label:"Partie 5 — Rupture du contrat",range:[15,17]},
+  {label:"Partie 6 — Aspects collectifs",range:[18,22]},
+  {label:"Partie 7 — Sécurité sociale",range:[23,24]},
+  {label:"Partie 8 — Assurance chômage",range:[25,25]},
+  {label:"Partie 9 — Aide sociale et complémentaires",range:[26,27]},
+  {label:"Partie 10 — Contentieux",range:[28,28]}
+];
+
+function renderFichesList(){
+  let html='';
+  PARTIES.forEach(p=>{
+    const fiches=FICHES.filter(f=>f.num>=p.range[0]&&f.num<=p.range[1]);
+    html+=`<div class="partie-section"><div class="partie-label">${p.label}</div><div class="fiches-row">`;
+    fiches.forEach(f=>{
+      const done=S.completedFiches.includes(f.num);
+      html+=`<div class="fiche-card" onclick="openFiche(${f.num-1})">
+        <div class="fiche-number">Fiche ${f.num}</div>
+        <div class="fiche-title">${f.title}</div>
+        ${done?'<div class="fiche-done-badge">✓ Lu</div>':''}
+      </div>`;
+    });
+    html+=`</div></div>`;
   });
+  document.getElementById('fiches-list').innerHTML=html;
+  updateHome();
 }
 
-function openFiche(num) {
-  const fiche = FICHES.find(f => f.num === num);
-  if (!fiche) return;
-  
-  document.getElementById('fiche-content-area').innerHTML = fiche.content;
-  if (!state.readFiches.includes(num)) {
-    state.readFiches.push(num);
-    localStorage.setItem('readFiches', JSON.stringify(state.readFiches));
-  }
+function openFiche(idx){
+  S.currentFiche=idx;
+  renderFiche();
   showScreen('reader');
-  updateStats();
+  document.querySelectorAll('.top-nav-tab,.bottom-nav-item').forEach(t=>t.classList.remove('active'));
 }
 
-// LOGIQUE IA JURISTE
-async function sendChat() {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
-  if (!msg) return;
+function renderFiche(){
+  const f=FICHES[S.currentFiche];
+  document.getElementById('fiche-content-area').innerHTML=f.content;
+  document.getElementById('reader-progress').textContent=`${S.currentFiche+1} / ${FICHES.length}`;
+  document.getElementById('btn-next-fiche').onclick=()=>{
+    if(!S.completedFiches.includes(f.num)){S.completedFiches.push(f.num);save();}
+    if(S.currentFiche<FICHES.length-1){S.currentFiche++;renderFiche();window.scrollTo(0,0);}
+    else{toast('🎉 Toutes les fiches lues !','success');showScreen('fiches');}
+  };
+  // Bandeau mise à jour
+  const updateBar = document.createElement('div');
+  updateBar.className = 'fiche-update-bar';
+  updateBar.innerHTML = `
+    <button class="fiche-update-btn" id="update-btn-${f.num}" onclick="checkFicheUpdate(${f.num-1})">
+      Vérifier la mise à jour des informations
+      <span id="update-arrow-${f.num}">→</span>
+    </button>
+    <div class="fiche-update-result" id="update-result-${f.num}"></div>
+  `;
+  document.getElementById('fiche-content-area').appendChild(updateBar);
+}
 
-  const container = document.getElementById('chat-messages');
-  container.innerHTML += `<div class="chat-msg user"><div class="chat-bubble">${msg}</div></div>`;
-  input.value = '';
+async function checkFicheUpdate(idx) {
+  if (!isPremium()) { openPremium(() => checkFicheUpdate(idx)); return; }
+  const f = FICHES[idx];
+  const btn = document.getElementById(`update-btn-${f.num}`);
+  const result = document.getElementById(`update-result-${f.num}`);
+  const arrow = document.getElementById(`update-arrow-${f.num}`);
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  arrow.textContent = '⏳';
+
+  const content = f.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 2000);
 
   try {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: [{ role: 'user', content: msg }] })
+      body: JSON.stringify({
+        messages: [{
+          role: 'user',
+          content: `Tu es un expert en droit du travail français. Vérifie si le contenu de cette fiche est toujours à jour en 2026 en cherchant sur le web les éventuelles modifications législatives récentes.\n\nFiche : "${f.title}"\n\nContenu actuel :\n${content}\n\nRéponds en français avec :\n1. Un statut clair : ✅ À jour ou ⚠️ Modifications détectées\n2. Si des modifications existent, liste-les précisément avec les nouvelles valeurs\n3. Cite tes sources`
+        }]
+      })
     });
     const data = await res.json();
-    const reply = data.content?.[0]?.text || "Désolé, une erreur est survenue.";
-    container.innerHTML += `<div class="chat-msg ai"><div class="chat-bubble">${marked.parse(reply)}</div></div>`;
+    const reply = data.content?.[0]?.text || 'Impossible de vérifier.';
+    const isWarn = reply.includes('⚠') || reply.toLowerCase().includes('modification');
+    result.className = `fiche-update-result show ${isWarn ? 'warn' : 'ok'}`;
+    result.innerHTML = marked.parse(reply);
+    arrow.textContent = isWarn ? '⚠️' : '✅';
   } catch(e) {
-    container.innerHTML += `<div class="chat-msg ai"><div class="chat-bubble">❌ Erreur de connexion au Juriste IA.</div></div>`;
+    result.className = 'fiche-update-result show warn';
+    result.innerHTML = '❌ Erreur de connexion.';
+    arrow.textContent = '❌';
   }
-  container.scrollTop = container.scrollHeight;
+  btn.classList.remove('loading');
+  btn.disabled = false;
 }
 
-// CONNEXION BREVO
+// =============================================
+// FLASHCARDS + SPACED REPETITION
+// =============================================
+const FC_TAGS=['Toutes',...[...new Set(FLASHCARDS.map(f=>f.tag))]];
+
+function initFlashcards(){
+  // Build filter buttons
+  const fc=document.getElementById('fc-filter');
+  fc.innerHTML=FC_TAGS.map((t,i)=>`<button class="fc-filter-btn${i===0?' active':''}" onclick="setFcFilter('${t}')">${t}</button>`).join('');
+  filterCards();
+  renderFlashcard();
+  updateSRBadges();
+}
+
+function setFcFilter(tag){
+  S.fcFilter=tag;
+  document.querySelectorAll('.fc-filter-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent===tag);
+  });
+  filterCards();
+  S.currentCard=0;
+  renderFlashcard();
+}
+
+function filterCards(){
+  if(S.fcFilter==='Toutes'){S.activeCards=FLASHCARDS.map((_,i)=>i);}
+  else{S.activeCards=FLASHCARDS.map((_,i)=>i).filter(i=>FLASHCARDS[i].tag===S.fcFilter);}
+}
+
+function renderFlashcard(){
+  if(!S.activeCards.length){document.getElementById('fiche-content-area')&&(document.getElementById('fiche-content-area').textContent='');return;}
+  const idx=S.activeCards[S.currentCard%S.activeCards.length];
+  const card=FLASHCARDS[idx];
+  S.cardFlipped=false;
+  document.getElementById('card-scene').classList.remove('flipped');
+  document.getElementById('fc-tag').textContent=card.tag;
+  document.getElementById('fc-question').textContent=card.q;
+  document.getElementById('fc-answer').textContent=card.a;
+  document.getElementById('fc-counter').textContent=`${(S.currentCard%S.activeCards.length)+1} / ${S.activeCards.length}`;
+  document.getElementById('sr-feedback').classList.remove('show');
+}
+
+function flipCard(){
+  S.cardFlipped=!S.cardFlipped;
+  document.getElementById('card-scene').classList.toggle('flipped',S.cardFlipped);
+  if(S.cardFlipped) document.getElementById('sr-feedback').classList.add('show');
+}
+
+function srRate(rating){
+  const idx=S.activeCards[S.currentCard%S.activeCards.length];
+  if(rating==='no') S.srData[idx]='new';
+  else if(rating==='hard') S.srData[idx]='learning';
+  else S.srData[idx]='known';
+  save();
+  updateSRBadges();
+  nextCard();
+  toast(rating==='ok'?'✅ Carte maîtrisée !':rating==='hard'?'🤔 À revoir bientôt':'😕 Remise dans la pile');
+}
+
+function updateSRBadges(){
+  const {n,l,k}=getSRCounts();
+  document.getElementById('sr-new-count').textContent=`🆕 ${n} nouvelles`;
+  document.getElementById('sr-learning-count').textContent=`📖 ${l} en cours`;
+  document.getElementById('sr-known-count').textContent=`✅ ${k} maîtrisées`;
+}
+
+function nextCard(){
+  S.currentCard=(S.currentCard+1)%S.activeCards.length;
+  renderFlashcard();
+}
+function prevCard(){
+  S.currentCard=(S.currentCard-1+S.activeCards.length)%S.activeCards.length;
+  renderFlashcard();
+}
+
+// =============================================
+// QUIZ
+// =============================================
+const QUIZ_CATS=['Toutes',...[...new Set(QUIZ.map(q=>q.cat))]];
+const QUIZ_FICHES=['Toutes',...[...new Set(QUIZ.map(q=>q.fiche))].sort((a,b)=>a-b).map(n=>`Fiche ${n}`)];
+let filteredQuiz=[...QUIZ];
+let quizShuffled=[];
+
+function shuffleArray(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function initQuiz(){
+  if(!S.quizFicheFilter) S.quizFicheFilter='Toutes';
+  const qf=document.getElementById('quiz-filter');
+  const catBtns=QUIZ_CATS.map((c,i)=>`<button class="q-filter-btn${i===0?' active':''}" onclick="setQuizFilter('cat','${c}')">${c}</button>`).join('');
+  const ficheBtns=QUIZ_FICHES.map((f,i)=>`<button class="q-filter-btn q-filter-fiche${i===0?' active':''}" onclick="setQuizFilter('fiche','${f}')">${f}</button>`).join('');
+  qf.innerHTML=`<div style="display:flex;flex-direction:column;gap:.4rem;width:100%"><div style="font-size:.7rem;color:var(--text-muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Par catégorie</div><div style="display:flex;flex-wrap:wrap;gap:.35rem">${catBtns}</div><div style="font-size:.7rem;color:var(--text-muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-top:.25rem">Par fiche</div><div style="display:flex;flex-wrap:wrap;gap:.35rem">${ficheBtns}</div></div>`;
+  applyFilters();
+}
+
+function setQuizFilter(type,val){
+  if(type==='cat'){
+    S.quizFilter=val;S.quizFicheFilter='Toutes';
+    document.querySelectorAll('.q-filter-btn:not(.q-filter-fiche)').forEach(b=>b.classList.toggle('active',b.textContent===val));
+    document.querySelectorAll('.q-filter-fiche').forEach((b,i)=>b.classList.toggle('active',i===0));
+  } else {
+    S.quizFicheFilter=val;S.quizFilter='Toutes';
+    document.querySelectorAll('.q-filter-fiche').forEach(b=>b.classList.toggle('active',b.textContent===val));
+    document.querySelectorAll('.q-filter-btn:not(.q-filter-fiche)').forEach((b,i)=>b.classList.toggle('active',i===0));
+  }
+  applyFilters();
+}
+
+function applyFilters(){
+  let q=[...QUIZ];
+  if(S.quizFilter&&S.quizFilter!=='Toutes') q=q.filter(x=>x.cat===S.quizFilter);
+  if(S.quizFicheFilter&&S.quizFicheFilter!=='Toutes') q=q.filter(x=>`Fiche ${x.fiche}`===S.quizFicheFilter);
+  filteredQuiz=q;
+  restartQuiz();
+}
+
+function restartQuiz(){
+  S.currentQ=0;S.quizScore=0;S.quizAnswered=false;S.quizDone=false;
+  quizShuffled=shuffleArray(filteredQuiz.length?filteredQuiz:[...QUIZ]);
+  // Clear quiz area and actions before rendering first question
+  const area=document.getElementById('quiz-area');
+  const actions=document.getElementById('quiz-actions');
+  if(area) area.innerHTML='';
+  if(actions) actions.innerHTML='';
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion(){
+  if(S.quizDone||S.currentQ>=quizShuffled.length){renderResults();return;}
+  S.quizAnswered=false;
+  const q=quizShuffled[S.currentQ];
+  const indices=Array.from({length:q.opts.length},(_,i)=>i);
+  const shuffledIdx=shuffleArray(indices);
+  const newCorrect=shuffledIdx.indexOf(q.correct);
+  const shuffledOpts=shuffledIdx.map(i=>q.opts[i]);
+  const pct=(S.currentQ/quizShuffled.length)*100;
+  document.getElementById('quiz-bar').style.width=pct+'%';
+  document.getElementById('quiz-subtitle').textContent=`Question ${S.currentQ+1}/${quizShuffled.length} — Score : ${S.quizScore}`;
+  document.getElementById('quiz-area').innerHTML=`
+    <div class="question-card">
+      <div class="q-meta">Fiche ${q.fiche} · ${q.cat}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options-list">${shuffledOpts.map((o,i)=>`<button class="opt-btn" onclick="selectAnswer(${i},${newCorrect})">${o}</button>`).join('')}</div>
+      <div class="explanation" id="expl"><strong>Explication :</strong> ${q.expl}</div>
+    </div>`;
+  document.getElementById('quiz-actions').innerHTML=`
+    <button class="btn-secondary" onclick="prevQuestion()" ${S.currentQ===0?'style="visibility:hidden"':''}>← Précédente</button>
+    <button class="btn-secondary" onclick="nextQuestion()">Passer →</button>`;
+}
+
+function selectAnswer(idx,correctIdx){
+  if(S.quizAnswered) return;
+  S.quizAnswered=true;
+  document.querySelectorAll('.opt-btn').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correctIdx) b.classList.add('correct');
+    else if(i===idx&&i!==correctIdx) b.classList.add('wrong');
+  });
+  if(idx===correctIdx){S.quizScore++;toast('✓ Bonne réponse !','success');}
+  else toast('✗ Mauvaise réponse','error');
+  document.getElementById('expl').classList.add('show');
+  document.getElementById('quiz-subtitle').textContent=`Question ${S.currentQ+1}/${quizShuffled.length} — Score : ${S.quizScore}`;
+  document.getElementById('quiz-actions').innerHTML=`
+    <button class="btn-secondary" onclick="prevQuestion()" ${S.currentQ===0?'style="visibility:hidden"':''}>← Précédente</button>
+    <button class="btn-primary" onclick="nextQuestion()">Suivante →</button>`;
+}
+
+function nextQuestion(){
+  if(S.currentQ < quizShuffled.length - 1){ S.currentQ++; renderQuizQuestion(); }
+  else { renderResults(); }
+}
+
+function prevQuestion(){
+  if(S.currentQ > 0){ S.currentQ--; renderQuizQuestion(); }
+}
+
+function renderResults(){
+  S.quizDone=true;
+  const total=quizShuffled.length||1;
+  const pct=Math.round((S.quizScore/total)*100);
+  if(S.bestScore===null||pct>S.bestScore){S.bestScore=pct;save();}
+  const emoji=pct>=80?'🏆':pct>=60?'💪':'📚';
+  const msg=pct>=80?'Excellent !':pct>=60?'Bon travail !':'Continuez à réviser !';
+  document.getElementById('quiz-bar').style.width='100%';
+  document.getElementById('quiz-subtitle').textContent='Quiz terminé';
+  document.getElementById('quiz-area').innerHTML=`
+    <div class="results-wrap"><div class="results-card">
+      <div class="results-score">${pct}%</div>
+      <div class="results-label">${emoji} ${msg}</div>
+      <div class="results-stats">
+        <div class="rs-pill rs-correct"><div class="rs-num">${S.quizScore}</div><div class="rs-lbl">Bonnes réponses</div></div>
+        <div class="rs-pill rs-wrong"><div class="rs-num">${total-S.quizScore}</div><div class="rs-lbl">Erreurs</div></div>
+      </div>
+      <button class="btn-primary" onclick="restartQuiz()" style="margin-top:.5rem">🔀 Recommencer</button>
+    </div></div>`;
+  document.getElementById('quiz-actions').innerHTML='';
+  updateHome();
+}
+
+// =============================================
+// RECAP
+// =============================================
+function renderRecap(){
+  document.getElementById('recap-list').innerHTML=RECAP.map((s,i)=>`
+    <div class="recap-section">
+      <div class="recap-head" onclick="toggleRecap(${i})">
+        <div class="recap-head-title">${s.title}</div>
+        <div class="recap-head-right">
+          <span class="recap-count">${s.items.length}</span>
+          <span class="recap-chevron" id="chev-${i}">▼</span>
+        </div>
+      </div>
+      <div class="recap-body${i<2?' open':''}" id="rb-${i}">
+        <div class="recap-body-inner">
+          ${s.items.map(it=>`<div class="recap-row"><div class="recap-key">${it.k}</div><div class="recap-val">${it.v}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleRecap(i){
+  const b=document.getElementById('rb-'+i);
+  const c=document.getElementById('chev-'+i);
+  b.classList.toggle('open');
+  c.textContent=b.classList.contains('open')?'▲':'▼';
+}
+
+// =============================================
+// THEME
+// =============================================
+function toggleTheme(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',isDark?'light':'dark');
+  document.getElementById('theme-btn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem('ls_theme',isDark?'light':'dark');
+}
+// Load saved theme
+const savedTheme=localStorage.getItem('ls_theme');
+if(savedTheme){
+  document.documentElement.setAttribute('data-theme',savedTheme);
+  document.getElementById('theme-btn').textContent=savedTheme==='light'?'🌙':'☀️';
+}
+
+// =============================================
+// TOAST
+// =============================================
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+(type||'');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.className='toast',2500);
+}
+
+// =============================================
+// BLOG — Substack RSS
+// =============================================
+const SUBSTACK_URL = 'https://topsirh.substack.com';
+const RSS_URL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(SUBSTACK_URL+'/feed')}&api_key=public&count=20`;
+let blogPosts = [];
+let blogFilter = 'Tous';
+let blogLoaded = false;
+
+async function loadBlog() {
+  if (blogLoaded) { renderBlog(); return; }
+  try {
+    const res = await fetch(RSS_URL);
+    const data = await res.json();
+    if (data.status === 'ok' && data.items) {
+      blogPosts = data.items.map(item => ({
+        title: item.title,
+        excerpt: stripHtml(item.description || item.content || '').slice(0, 160) + '...',
+        date: new Date(item.pubDate).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}),
+        link: item.link,
+        tag: detectTag(item.title + ' ' + (item.description || '')),
+        thumbnail: item.thumbnail || item.enclosure?.link || null
+      }));
+      blogLoaded = true;
+      renderBlogFilters();
+      renderBlog();
+    } else {
+      showBlogError();
+    }
+  } catch(e) {
+    showBlogError();
+  }
+}
+
+function stripHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function detectTag(text) {
+  const t = text.toLowerCase();
+  if (t.includes('sirh') || t.includes('rh') || t.includes('ressources humaines') || t.includes('logiciel') || t.includes('digital')) return 'RH / SIRH';
+  if (t.includes('contrat') || t.includes('licenciem') || t.includes('droit') || t.includes('salaire') || t.includes('cdd') || t.includes('cdi')) return 'Droit du travail';
+  return 'Actualités';
+}
+
+function renderBlogFilters() {
+  const tags = ['Tous', ...new Set(blogPosts.map(p => p.tag))];
+  document.getElementById('blog-filter').innerHTML = tags.map(t =>
+    `<button class="blog-filter-btn${t==='Tous'?' active':''}" onclick="setBlogFilter('${t}')">${t}</button>`
+  ).join('');
+}
+
+function setBlogFilter(tag) {
+  blogFilter = tag;
+  document.querySelectorAll('.blog-filter-btn').forEach(b => b.classList.toggle('active', b.textContent === tag));
+  renderBlog();
+}
+
+function renderBlog() {
+  const filtered = blogFilter === 'Tous' ? blogPosts : blogPosts.filter(p => p.tag === blogFilter);
+  if (!filtered.length) {
+    document.getElementById('blog-grid').innerHTML = `<div class="blog-error"><p>Aucun article dans cette catégorie.</p></div>`;
+    return;
+  }
+  document.getElementById('blog-grid').innerHTML = filtered.map(p => `
+    <a class="blog-card" href="${p.link}" target="_blank" rel="noopener">
+      <div class="blog-card-tag">${p.tag}</div>
+      <div class="blog-card-title">${p.title}</div>
+      <div class="blog-card-excerpt">${p.excerpt}</div>
+      <div class="blog-card-footer">
+        <span class="blog-card-date">${p.date}</span>
+        <span class="blog-card-read">Lire →</span>
+      </div>
+    </a>`).join('');
+}
+
+function showBlogError() {
+  document.getElementById('blog-grid').innerHTML = `
+    <div class="blog-error">
+      <p style="font-size:2rem;margin-bottom:.5rem">📡</p>
+      <p style="font-weight:600;margin-bottom:.5rem">Impossible de charger les articles</p>
+      <p style="font-size:.83rem">Consulte directement le blog sur <a href="${SUBSTACK_URL}" target="_blank">Substack</a></p>
+    </div>`;
+}
+
+// =============================================
+// SUBSCRIBE — Brevo fetch
+// =============================================
 async function submitSubscribe(e) {
   e.preventDefault();
-  const email = document.getElementById('subscribe-email').value;
+  const email = document.getElementById('subscribe-email').value.trim();
   const btn = document.getElementById('subscribe-submit');
-  
-  btn.textContent = '⏳ Vérification...';
+  const errEl = document.getElementById('subscribe-error');
+  const okEl = document.getElementById('subscribe-success');
+  if (!email) return;
+  btn.textContent = '⏳ Inscription en cours...';
   btn.disabled = true;
-
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
   try {
     const formData = new FormData();
     formData.append('EMAIL', email);
-    await fetch('https://2baff920.sibforms.com/serve/MUIFAD2Gyh81Kn1j-gAmFsCb9abwzHZmtBrXd7UglIum_S2ipSfL6WIcYfjJOEppWUB7nsd8lH5vNJPh_1pevmpRfWQ4kCSq8c5kJv4WU28NQfx4oeOEWY5qEfeNbDHLVCYoo4nJaos8emIUQlhQkScivj_f2_ARpUW_Pp_3t2qWT1x0t0ikn9xE2qeWj1gy9oqV-qaHFcBhTjNQLA==', {
+    formData.append('email_address_check', '');
+    formData.append('locale', 'fr');
+    const res = await fetch('https://2baff920.sibforms.com/serve/MUIFAD2Gyh81Kn1j-gAmFsCb9abwzHZmtBrXd7UglIum_S2ipSfL6WIcYfjJOEppWUB7nsd8lH5vNJPh_1pevmpRfWQ4kCSq8c5kJv4WU28NQfx4oeOEWY5qEfeNbDHLVCYoo4nJaos8emIUQlhQkScivj_f2_ARpUW_Pp_3t2qWT1x0t0ikn9xE2qeWj1gy9oqV-qaHFcBhTjNQLA==', {
       method: 'POST',
       body: formData,
       mode: 'no-cors'
     });
-
-    localStorage.setItem('site_access', 'true');
-    document.getElementById('subscribe-success').style.display = 'block';
+    // no-cors = pas de réponse lisible mais la requête passe
+    okEl.style.display = 'block';
     document.getElementById('subscribe-form').style.display = 'none';
-    setTimeout(() => { document.getElementById('modal-overlay').classList.remove('open'); }, 1500);
-  } catch(e) {
-    btn.textContent = 'Accéder au site →';
+    toast('🎉 Inscription confirmée !', 'success');
+    setTimeout(() => closeModal(), 3000);
+  } catch(err) {
+    errEl.style.display = 'block';
+    btn.textContent = '📧 Je m\'abonne gratuitement';
     btn.disabled = false;
-    alert("Erreur réseau. Réessayez.");
   }
 }
 
-function updateStats() {
-  const chip = document.getElementById('global-progress');
-  if (chip) chip.textContent = `${state.readFiches.length}/28`;
+// =============================================
+// MODAL
+// =============================================
+function openModal(){document.getElementById('modal-overlay').classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal()});
+
+// =============================================
+// INIT
+// =============================================
+updateHome();
+renderRecap();
+
+
+
+// =============================================
+// CHATBOT IA
+// =============================================
+const WORKER_URL = 'https://lexstudy-api.kpnonon.workers.dev';
+let chatHistory = [];
+
+function addMessage(role, text, typing=false) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  div.innerHTML = `<div class="chat-bubble${typing?' typing':''}">${text}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+async function sendChat() {
+  if (!isPremium()) { openPremium(() => sendChat()); return; }
+  const input = document.getElementById('chat-input');
+  const btn = document.getElementById('chat-send');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  // Hide suggestions after first message
+  document.getElementById('chat-suggestions').style.display = 'none';
+
+  input.value = '';
+  btn.disabled = true;
+  addMessage('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+
+  const typingDiv = addMessage('ai', '⏳ En train de répondre…', true);
+
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatHistory })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      const errMsg = JSON.stringify(data.error || data);
+      typingDiv.querySelector('.chat-bubble').textContent = '❌ Erreur : ' + errMsg;
+      typingDiv.querySelector('.chat-bubble').classList.remove('typing');
+      btn.disabled = false;
+      input.focus();
+      return;
+    }
+    const reply = data.content?.[0]?.text || "Désolé, je n'ai pas pu répondre.";
+    typingDiv.querySelector('.chat-bubble').innerHTML = marked.parse(reply);
+    typingDiv.querySelector('.chat-bubble').classList.remove('typing');
+    chatHistory.push({ role: 'assistant', content: reply });
+  } catch(e) {
+    typingDiv.querySelector('.chat-bubble').textContent = '❌ Erreur de connexion : ' + e.message;
+  }
+  btn.disabled = false;
+  input.focus();
+}
+
+function sendSugg(btn) {
+  document.getElementById('chat-input').value = btn.textContent;
+  sendChat();
+}
+
+function clearChat() {
+  chatHistory = [];
+  const c = document.getElementById('chat-messages');
+  c.innerHTML = `<div class="chat-msg ai"><div class="chat-bubble">⚖️ Bonjour ! Je suis votre assistant juriste spécialisé en droit du travail français.<br><br>Posez-moi vos questions sur les contrats, licenciements, congés, salaires, représentation du personnel…</div></div>`;
+  document.getElementById('chat-suggestions').style.display = 'flex';
+}
+
+// =============================================
+// VEILLE LÉGISLATIVE
+// =============================================
+function initVeille() {
+  const sel = document.getElementById('veille-fiche-select');
+  if (sel.options.length > 1) return;
+  FICHES.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.num - 1;
+    opt.textContent = `Fiche ${f.num} — ${f.title}`;
+    sel.appendChild(opt);
+  });
+}
+
+async function checkVeille() {
+  const sel = document.getElementById('veille-fiche-select');
+  const btn = document.getElementById('veille-btn');
+  const result = document.getElementById('veille-result');
+  const idx = sel.value;
+  if (idx === '') { alert('Choisissez une fiche !'); return; }
+
+  const fiche = FICHES[parseInt(idx)];
+  const content = fiche.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 1500);
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Analyse…';
+  result.style.display = 'none';
+
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'veille',
+        messages: [{ role: 'user', content: `Analyse cette fiche de droit du travail :\n\nTitre : ${fiche.title}\n\nContenu : ${content}` }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '{}';
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch(e) { parsed = { obsolete: false, confiance: 'faible', raison: raw, suggestion: '' }; }
+
+    const isWarn = parsed.obsolete;
+    result.className = `veille-result ${isWarn ? 'veille-warn' : 'veille-ok'}`;
+    result.innerHTML = `
+      <div class="veille-result-title">${isWarn ? '⚠️ Potentiellement obsolète' : '✅ À jour'} <span style="font-size:.72rem;font-weight:400;opacity:.7">(confiance : ${parsed.confiance || 'moyenne'})</span></div>
+      <div class="veille-result-body">
+        <strong>Analyse :</strong> ${parsed.raison || '—'}<br>
+        ${parsed.suggestion ? `<strong>Suggestion :</strong> ${parsed.suggestion}` : ''}
+      </div>`;
+    result.style.display = 'block';
+  } catch(e) {
+    result.className = 'veille-result veille-warn';
+    result.innerHTML = '<div class="veille-result-title">❌ Erreur</div><div class="veille-result-body">Impossible de contacter le serveur IA.</div>';
+    result.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.textContent = '🔍 Analyser';
 }

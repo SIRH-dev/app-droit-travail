@@ -1,66 +1,285 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LexStudy — Droit du Travail 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="description" content="Le Droit du Travail Facile — Fiches de cours, quiz, flashcards et assistant juridique IA pour maîtriser le droit du travail français.">
+<title>Le Droit du Travail Facile</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+<!-- HEADER -->
 <header class="header">
   <div class="header-inner">
-    <div class="logo">⚖️ LexStudy</div>
+    <div class="logo">⚖️ Le Droit du Travail Facile</div>
     <nav class="top-nav">
-      <button onclick="showScreen('home')">Accueil</button>
-      <button onclick="showScreen('fiches')">Fiches</button>
-      <button onclick="showScreen('chat')">Juriste IA</button>
+      <button class="top-nav-tab active" onclick="showScreen('home')">Accueil</button>
+      <button class="top-nav-tab" onclick="showScreen('fiches')">📚 Fiches</button>
+      <button class="top-nav-tab" onclick="showScreen('flashcards')">🃏 Flashcards</button>
+      <button class="top-nav-tab" onclick="showScreen('quiz')">🎯 Quiz</button>
+      <button class="top-nav-tab" onclick="showScreen('recap')">📋 Récap</button>
+      <button class="top-nav-tab" onclick="showScreen('blog')">✍️ Blog</button>
+      <button class="top-nav-tab" onclick="showScreen('chat')">⚖️ Juriste</button>
     </nav>
     <div class="header-actions">
+      <button class="subscribe-btn" onclick="openModal()">📧 S'abonner</button>
+      <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" aria-label="Changer le thème" title="Changer le thème">🌙</button>
       <div class="progress-chip" id="global-progress">0/28</div>
     </div>
   </div>
 </header>
 
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal-box">
-    <h2>Bienvenue sur LexStudy</h2>
-    <p>Inscrivez-vous pour déverrouiller l'accès aux 28 fiches et au Juriste IA 2026.</p>
-    <div id="subscribe-success" style="display:none; color:var(--accent); margin-bottom:15px; font-weight:bold;">🎉 Accès accordé !</div>
-    <form id="subscribe-form" onsubmit="submitSubscribe(event)">
-      <input type="email" id="subscribe-email" placeholder="votre@email.com" required>
-      <button type="submit" id="subscribe-submit">Accéder au site →</button>
-    </form>
+<!-- MODAL ABONNEMENT -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-brevo">
+      <div style="font-size:22px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--text);margin-bottom:.5rem">
+        Restez informé avec Le Droit du Travail Facile
+      </div>
+      <div style="font-size:.88rem;color:var(--text-muted);margin-bottom:1.25rem;line-height:1.6">
+        Recevez les mises à jour du Droit du Travail directement dans votre boîte mail.
+      </div>
+      <div id="subscribe-success" style="display:none;background:#e7faf0;border:1px solid #13ce66;border-radius:10px;padding:1rem;text-align:center;color:#085229;font-weight:600;margin-bottom:1rem">
+        🎉 Inscription confirmée ! Vérifiez votre boîte mail.
+      </div>
+      <div id="subscribe-error" style="display:none;background:#ffeded;border:1px solid #ff4949;border-radius:10px;padding:1rem;text-align:center;color:#661d1d;font-size:.85rem;margin-bottom:1rem">
+        ❌ Une erreur est survenue. Réessayez.
+      </div>
+      <form id="subscribe-form" onsubmit="submitSubscribe(event)">
+        <label for="subscribe-email" style="font-size:.83rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.4rem">Votre adresse email *</label>
+        <input
+          type="email"
+          id="subscribe-email"
+          placeholder="exemple@email.com"
+          required
+          style="width:100%;padding:.75rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--surface2);color:var(--text);font-size:.9rem;font-family:'DM Sans',sans-serif;margin-bottom:.9rem;outline:none;transition:border .2s"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='var(--border)'"
+        />
+        <button
+          type="submit"
+          id="subscribe-submit"
+          style="width:100%;padding:.8rem;background:var(--accent);border:none;border-radius:10px;color:#0e0f13;font-size:.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .2s"
+        >
+          📧 Je m'abonne gratuitement
+        </button>
+      </form>
+    </div>
   </div>
 </div>
 
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav">
+  <button class="bottom-nav-item active" onclick="showScreen('home')"><span class="nav-icon">🏠</span>Accueil</button>
+  <button class="bottom-nav-item" onclick="showScreen('fiches')"><span class="nav-icon">📚</span>Fiches</button>
+  <button class="bottom-nav-item" onclick="showScreen('quiz')"><span class="nav-icon">🎯</span>Quiz</button>
+  <button class="bottom-nav-item" onclick="showScreen('blog')"><span class="nav-icon">✍️</span>Blog</button>
+  <button class="bottom-nav-item" onclick="showScreen('chat')"><span class="nav-icon">⚖️</span>Juriste</button>
+</nav>
+
+<!-- HOME -->
 <div id="screen-home" class="screen active">
   <div class="home-hero">
-    <h1>Maîtrisez le Droit du Travail</h1>
-    <button class="btn-primary" onclick="showScreen('fiches')">Commencer à réviser</button>
+    <h1>Maîtrisez le <em>Droit du Travail</em></h1>
+    <p>Votre assistant en droit du travail — fiches, quiz et IA pour décrocher vos examens avec confiance.</p>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="s-num" id="stat-fiches">0</div><div class="s-lbl">Fiches lues</div></div>
+    <div class="stat-card"><div class="s-num" id="stat-known">0</div><div class="s-lbl">Cartes maîtrisées</div></div>
+    <div class="stat-card"><div class="s-num" id="stat-quiz">—</div><div class="s-lbl">Meilleur score</div></div>
+    <div class="stat-card"><div class="s-num">28</div><div class="s-lbl">Fiches totales</div></div>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-card" style="--card-accent:#e8c96e" onclick="showScreen('fiches')">
+      <span class="badge">28</span><span class="icon">📚</span>
+      <h3>Cours</h3><p>Toutes les fiches structurées</p>
+    </div>
+    <div class="mode-card" style="--card-accent:#7b9cff" onclick="showScreen('flashcards')">
+      <span class="badge">80+</span><span class="icon">🃏</span>
+      <h3>Flashcards</h3><p>Révision espacée type Anki</p>
+    </div>
+    <div class="mode-card" style="--card-accent:#ff7b7b" onclick="showScreen('quiz')">
+      <span class="badge">60+</span><span class="icon">🎯</span>
+      <h3>Quiz</h3><p>QCM avec corrections</p>
+    </div>
+    <div class="mode-card" style="--card-accent:#7bffb8" onclick="showScreen('recap')">
+      <span class="badge">12</span><span class="icon">📋</span>
+      <h3>Mémo</h3><p>Délais et chiffres clés</p>
+    </div>
   </div>
 </div>
 
+<!-- FICHES -->
 <div id="screen-fiches" class="screen">
+  <div class="section-header">
+    <h2>Les 28 Fiches</h2>
+    <p>Cliquez pour lire le cours complet</p>
+  </div>
   <div id="fiches-list"></div>
 </div>
 
+<!-- READER -->
 <div id="screen-reader" class="screen">
   <div class="reader-container">
-    <button class="btn-back" onclick="showScreen('fiches')">← Retour</button>
+    <div class="reader-nav">
+      <button class="btn-back" onclick="showScreen('fiches')">← Fiches</button>
+      <span class="reader-progress" id="reader-progress"></span>
+      <button class="btn-next-fiche" id="btn-next-fiche">Suivante →</button>
+    </div>
     <div class="fiche-content" id="fiche-content-area"></div>
   </div>
 </div>
 
+<!-- FLASHCARDS -->
+<div id="screen-flashcards" class="screen">
+  <div class="fc-container">
+    <div class="fc-meta">
+      <h2>🃏 Flashcards</h2>
+      <div class="fc-counter" id="fc-counter">1 / 80</div>
+    </div>
+    <div class="sr-badges">
+      <span class="sr-badge sr-new" id="sr-new-count">🆕 0 nouvelles</span>
+      <span class="sr-badge sr-learning" id="sr-learning-count">📖 0 en cours</span>
+      <span class="sr-badge sr-known" id="sr-known-count">✅ 0 maîtrisées</span>
+    </div>
+    <div class="fc-filter" id="fc-filter"></div>
+    <div class="card-scene" id="card-scene" onclick="flipCard()">
+      <div class="card-inner" id="card-inner">
+        <div class="card-face card-front">
+          <div class="card-tag-pill" id="fc-tag">Question</div>
+          <div class="card-question" id="fc-question">…</div>
+          <div class="card-hint">Appuyez pour retourner</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-tag-pill">Réponse</div>
+          <div class="card-answer" id="fc-answer">…</div>
+        </div>
+      </div>
+    </div>
+    <div class="sr-feedback" id="sr-feedback">
+      <button class="sr-btn sr-btn-no" onclick="srRate('no')">😕 À revoir</button>
+      <button class="sr-btn sr-btn-hard" onclick="srRate('hard')">🤔 Difficile</button>
+      <button class="sr-btn sr-btn-ok" onclick="srRate('ok')">✅ Su !</button>
+    </div>
+    <div class="fc-nav">
+      <button class="fc-nav-btn fc-prev" onclick="prevCard()">← Précédente</button>
+      <button class="fc-nav-btn fc-next" onclick="nextCard()">Suivante →</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-container">
+    <div class="quiz-top">
+      <div><div class="quiz-title">🎯 Quiz</div><div class="quiz-subtitle" id="quiz-subtitle">Testez vos connaissances</div></div>
+      <button class="quiz-restart" onclick="restartQuiz()">↺ Recommencer</button>
+    </div>
+    <div class="quiz-filter" id="quiz-filter"></div>
+    <div class="quiz-bar-wrap"><div class="quiz-bar-fill" id="quiz-bar" style="width:0%"></div></div>
+    <div id="quiz-area"></div>
+    <div class="quiz-actions" id="quiz-actions"></div>
+  </div>
+</div>
+
+<!-- RECAP -->
+<div id="screen-recap" class="screen">
+  <div class="recap-container">
+    <div class="section-header" style="padding-left:0;padding-right:0">
+      <h2>📋 Mémo des Notions Clés</h2>
+      <p>Délais, chiffres et règles essentiels</p>
+    </div>
+    <div id="recap-list"></div>
+  </div>
+</div>
+
+<!-- BLOG -->
+<div id="screen-blog" class="screen">
+  <div class="blog-container">
+    <div class="section-header">
+      <h2>✍️ Blog TopSIRH</h2>
+      <p>Actualités droit du travail & conseils RH/SIRH — <a href="https://topsirh.substack.com" target="_blank" style="color:var(--accent)">S'abonner sur Substack</a></p>
+    </div>
+    <div id="blog-filter" class="blog-filter"></div>
+    <div id="blog-grid" class="blog-grid">
+      <div class="blog-loading">
+        <div class="blog-spinner"></div>
+        <p>Chargement des articles...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- CHAT IA -->
 <div id="screen-chat" class="screen">
   <div class="chat-container">
-    <div id="chat-messages" class="chat-messages"></div>
-    <div class="chat-input-row">
-      <input type="text" id="chat-input" placeholder="Posez une question..." onkeydown="if(event.key==='Enter') sendChat()">
-      <button class="chat-send-btn" onclick="sendChat()">➤</button>
+    <div class="chat-panel">
+      <div class="chat-panel-header">
+        <div>
+          <div class="chat-panel-title">⚖️ Juriste Droit du Travail</div>
+          <div class="chat-panel-sub">Posez vos questions sur le droit du travail français</div>
+        </div>
+        <button class="chat-clear-btn" onclick="clearChat()">🗑️ Effacer</button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-msg ai">
+          <div class="chat-bubble">⚖️ Bonjour ! Je suis votre assistant juriste spécialisé en droit du travail français.<br><br>Posez-moi vos questions sur les contrats, licenciements, congés, salaires, représentation du personnel…</div>
+        </div>
+      </div>
+      <div class="chat-suggestions" id="chat-suggestions">
+        <button class="chat-sugg" onclick="sendSugg(this)">Durée du préavis pour un cadre ?</button>
+        <button class="chat-sugg" onclick="sendSugg(this)">Comment fonctionne la rupture conventionnelle ?</button>
+        <button class="chat-sugg" onclick="sendSugg(this)">Droits en cas de licenciement économique ?</button>
+        <button class="chat-sugg" onclick="sendSugg(this)">Combien de jours de congés payés par an ?</button>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Posez votre question…" onkeydown="if(event.key==='Enter') sendChat()"/>
+        <button class="chat-send-btn" onclick="sendChat()" id="chat-send">➤</button>
+      </div>
     </div>
+
+  </div>
+</div>
+
+
+
+
+
+
+
+
+<!-- PREMIUM MODAL -->
+<div class="premium-overlay" id="premium-overlay">
+  <div class="premium-box">
+    <button class="premium-close" onclick="closePremium()">✕</button>
+    <div class="premium-title">Fonctionnalité Premium</div>
+    <div class="premium-desc">Cette fonctionnalité est réservée aux membres. Soutenez le projet pour 3€/mois et recevez votre code d'accès instantanément.</div>
+    <input type="text" class="premium-input" id="premium-code-input" placeholder="DROIT-XXXX-XXXX" maxlength="15"/>
+    <div class="premium-error" id="premium-error"></div>
+    <button class="premium-submit" id="premium-submit" onclick="submitPremiumCode()">Activer mon accès</button>
+    <div class="premium-kofi">Pas encore membre ? <a href="https://ko-fi.com/W7W01W3Z5O" target="_blank">Se connecter à Ko-fi</a></div>
+  </div>
+</div>
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- PREMIUM MODAL -->
+<div class="premium-overlay" id="premium-overlay">
+  <div class="premium-box">
+    <button class="premium-close" onclick="closePremium()">✕</button>
+    <div class="premium-title">Fonctionnalité Premium</div>
+    <div class="premium-desc">Cette fonctionnalité est réservée aux membres. Soutenez le projet pour 3€/mois et recevez votre code d'accès instantanément.</div>
+    <input type="text" class="premium-input" id="premium-code-input" placeholder="DROIT-XXXX-XXXX" maxlength="15"/>
+    <div class="premium-error" id="premium-error"></div>
+    <button class="premium-submit" id="premium-submit" onclick="submitPremiumCode()">Activer mon accès</button>
+    <div class="premium-kofi">Pas encore membre ? <a href="https://ko-fi.com/W7W01W3Z5O" target="_blank">Se connecter à Ko-fi</a></div>
   </div>
 </div>
 
