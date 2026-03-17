@@ -1,33 +1,147 @@
 :root {
-  /* Couleurs uniques basées sur ton thème "Succès" */
-  --bg: #0e1111; 
-  --surface: rgba(21, 26, 24, 0.8); 
-  --surface2: rgba(30, 36, 34, 0.9); 
-  --surface3: #272f2d;
-  --border: #303a37; 
-  --accent: #2ecc71; 
-  --accent2: #3498db; 
-  --accent3: #e74c3c;
-  --accent4: #f1c40f; 
-  --text: #e8e9f0; 
-  --text-muted: #7e8c88; 
-  --text-dim: #a0b0ab;
-  --correct: #2ecc71; 
-  --wrong: #e74c3c; 
-  --shadow: rgba(0,0,0,0.4);
-  
-  /* L'unique arrière-plan fluide */
-  --app-bg: radial-gradient(circle at 0% 0%, rgba(46, 204, 113, 0.12) 0%, transparent 40%),
-            radial-gradient(circle at 100% 100%, rgba(52, 152, 219, 0.08) 0%, transparent 40%),
-            #0e1111;
+  /* Palette inspirée de l'image (Vert émeraude et noir profond) */
+  --accent: #2ecc71;
+  --accent-glow: rgba(46, 204, 113, 0.4);
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --bg-deep: #0a0c10;
 }
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: var(--app-bg) !important; /* Force l'arrière-plan unique */
-  background-attachment: fixed;
+  margin: 0;
   color: var(--text);
   min-height: 100vh;
-  overflow-x: hidden;
-  padding-bottom: 72px;
+  /* Arrière-plan avec des orbes de lumière comme sur ton modèle */
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(46, 204, 113, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(52, 152, 219, 0.1) 0%, transparent 40%),
+    var(--bg-deep);
+  background-attachment: fixed;
+  line-height: 1.6;
+}
+
+/* ===== EFFET DE VERRE (Glassmorphism) ===== */
+.header, .fiche-card, .stat-card, .bottom-nav, .question-card {
+  background: var(--glass);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* ===== HEADER ===== */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* ===== GRILLE DE CARTES (Style Premium) ===== */
+.fiches-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+}
+
+.fiche-card {
+  border-radius: 24px;
+  padding: 2rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.fiche-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.fiche-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  border-color: var(--accent);
+  background: rgba(46, 204, 113, 0.05);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.fiche-number {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.fiche-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+}
+
+/* ===== STATISTIQUES ===== */
+.stats-row {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.stat-card {
+  flex: 1;
+  border-radius: 20px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.s-num {
+  font-size: 2.2rem;
+  color: var(--accent);
+  font-weight: 900;
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+.s-lbl {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+/* ===== BOUTONS ===== */
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px var(--accent-glow);
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px var(--accent-glow);
 }
