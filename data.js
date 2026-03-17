@@ -1,660 +1,129 @@
 // =============================================
-// ÉTAT DE L'APPLICATION & SAUVEGARDES
+// DATA — FICHES
 // =============================================
-let state = {
-  theme: localStorage.getItem('theme') || 'dark',
-  readFiches: JSON.parse(localStorage.getItem('readFiches')) || [],
-  flashcards: JSON.parse(localStorage.getItem('flashcards')) || {},
-  quizHighscore: localStorage.getItem('quizHighscore') || null
-};
-
-// Clé pour le Premium Cloudflare
-const PREMIUM_KEY = 'premium_access';
-let pendingPremiumAction = null;
-
-// URL de ton Cloudflare Worker IA
-const WORKER_URL = 'https://lexstudy-api.kpnonon.workers.dev';
-
-// =============================================
-// INITIALISATION
-// =============================================
-document.addEventListener('DOMContentLoaded', () => {
-  document.documentElement.setAttribute('data-theme', state.theme);
-  const hash = window.location.hash.replace('#', '') || 'home';
-  showScreen(hash, false);
-  updateHomeStats();
-});
-
-window.addEventListener('hashchange', () => {
-  const hash = window.location.hash.replace('#', '') || 'home';
-  showScreen(hash, false);
-});
-
-function showToast(msg, type = 'success') {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = 'toast show ' + type;
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-function toggleTheme() {
-  state.theme = state.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', state.theme);
-  localStorage.setItem('theme', state.theme);
-}
+const FICHES = [
+  {num:1,title:"Définition et sources du droit du travail",partie:"1 — Sources et contrôle",content:`<h2>Fiche 1 — Définition et sources du droit du travail</h2><p>Le droit du travail est l'ensemble des règles juridiques applicables aux relations individuelles et collectives entre les employeurs privés et leurs salariés. Son but est de protéger les salariés tout en prenant en compte la protection de l'emploi.</p><h3>1. Caractéristiques</h3><ul><li>Droit <strong>récent</strong></li><li>Droit <strong>étatique</strong> : ordre public social</li><li>Droit <strong>négocié</strong> : rôle essentiel des partenaires sociaux</li></ul><h3>2. Sources supra-étatiques</h3><h4>Sources internationales</h4><ul><li><strong>OIT</strong> : conventions et recommandations, aucun moyen de contrainte</li><li><strong>Conseil de l'Europe</strong> (46 États) : Convention EDH (1950), Charte sociale européenne (1961)</li></ul><h4>Sources communautaires</h4><ul><li>Traités, Charte des droits fondamentaux (2007)</li><li>Directives (nécessitent transposition) et règlements (application directe)</li><li>Jurisprudence de la CJUE</li></ul><h4>Sources nationales</h4><ul><li>Constitution → loi → règlements</li><li>Jurisprudence (interprète et précise la loi)</li></ul><h3>3. Sources professionnelles</h3><ul><li>ANI, accords de branche, accords d'entreprise</li><li>Usage : <strong>généralité + constance + fixité</strong></li><li>Engagement unilatéral : explicite, sans condition</li></ul><div class="key-point"><strong>⚠️ Ordonnances Macron :</strong> L'accord d'entreprise prime sur l'accord de branche (fin du principe de faveur automatique), sauf dans les domaines verrouillés.</div><h3>4. Dénonciation d'un usage</h3><ul><li>Informer les représentants du personnel</li><li>Informer tous les salariés individuellement</li><li>Respecter un préavis <strong>raisonnable</strong></li></ul>`},
+  {num:2,title:"Le conseil de prud'hommes",partie:"1 — Sources et contrôle",content:`<h2>Fiche 2 — Le conseil de prud'hommes</h2><p>Juridiction paritaire compétente pour tous les litiges individuels nés à l'occasion d'un contrat de travail.</p><h3>1. Délais de recours</h3><div class="table-wrapper"><table class="data-table"><tr><th>Type de litige</th><th>Délai</th></tr><tr><td>Exécution du contrat</td><td>2 ans</td></tr><tr><td>Rupture du contrat</td><td>12 mois</td></tr><tr><td>Salaires / heures supp / primes</td><td>3 ans</td></tr><tr><td>Solde de tout compte signé</td><td>6 mois</td></tr><tr><td>Harcèlement / discrimination</td><td>5 ans</td></tr><tr><td>Dommages corporels</td><td>10 ans</td></tr></table></div><h3>2. Procédure</h3><ul><li><strong>BCO</strong> (Bureau de Conciliation et d'Orientation) : phase obligatoire, à huis clos</li><li><strong>Bureau de jugement</strong> en cas d'échec de conciliation</li><li><strong>Juge départiteur</strong> (TJ) en cas de partage des voix</li></ul><div class="key-point"><strong>Appel :</strong> Possible si demande > 5 000 €, dans le délai d'1 mois (suspensif). En dessous → pourvoi en cassation uniquement (2 mois).</div><h3>3. Barème licenciement sans cause réelle et sérieuse (≥ 11 salariés)</h3><div class="table-wrapper"><table class="data-table"><tr><th>Ancienneté</th><th>Min</th><th>Max</th></tr><tr><td>Moins de 1 an</td><td>0</td><td>1 mois</td></tr><tr><td>5 ans</td><td>3 mois</td><td>6 mois</td></tr><tr><td>10 ans</td><td>3 mois</td><td>10 mois</td></tr><tr><td>30 ans et +</td><td>3 mois</td><td>30 mois</td></tr></table></div>`},
+  {num:3,title:"L'inspection du travail",partie:"1 — Sources et contrôle",content:`<h2>Fiche 3 — L'inspection du travail</h2><p>Mission : assurer le respect de la législation du travail, conseiller et concilier.</p><h3>1. Pouvoirs</h3><ul><li>Droit de visite sans prévenir l'employeur</li><li>Droit de communication de tous documents légaux</li><li>Autoriser/interdire le licenciement des salariés protégés</li><li>Contrôler le règlement intérieur</li></ul><h3>2. Éventail des sanctions</h3><div class="table-wrapper"><table class="data-table"><tr><th>Sanction</th><th>Description</th></tr><tr><td>Observations</td><td>Simple avertissement</td></tr><tr><td>Mise en demeure</td><td>Obligatoire pour hygiène/sécurité</td></tr><tr><td>Procès-verbal</td><td>Transmis au parquet ; obligatoire si atteinte aux libertés</td></tr><tr><td>Saisine juge référés</td><td>Risque d'atteinte à l'intégrité physique</td></tr><tr><td>Arrêt de chantier</td><td>BTP : danger grave et imminent</td></tr></table></div><h3>3. Amendes administratives (DREETS)</h3><ul><li><strong>4 000 €/salarié</strong> pour manquements durée travail, salaire, locaux</li><li><strong>8 000 €</strong> en cas de récidive dans les 2 ans</li><li><strong>10 000 €/salarié</strong> pour manquements santé/sécurité</li></ul><div class="key-point"><strong>Délit d'entrave :</strong> 37 500 € + 1 an de prison pour obstruction à la mission de l'inspecteur.</div>`},
+  {num:4,title:"L'embauche et la période précontractuelle",partie:"2 — Embauche et contrats",content:`<h2>Fiche 4 — L'embauche et le recrutement</h2><h3>1. Le recrutement</h3><p>Les informations demandées à un candidat ne peuvent avoir comme finalité que d'apprécier sa capacité à occuper l'emploi. Elles doivent présenter un <strong>lien direct et nécessaire</strong> avec le poste (Art. L. 1221-6). Le candidat doit y répondre de bonne foi, sous peine de nullité du contrat si le mensonge a été déterminant dans l'embauche (ex: faux diplôme indispensable).</p><h3>2. Offre vs Promesse d'embauche (Revirement 2017)</h3><p>Depuis les arrêts du 21 septembre 2017, il faut distinguer :</p><ul><li><strong>L'offre de contrat de travail :</strong> L'employeur propose un engagement mais exprime sa volonté d'être lié *seulement en cas d'acceptation*. Il peut se rétracter librement avant acceptation (engage uniquement sa responsabilité extra-contractuelle pour le préjudice subi).</li><li><strong>La promesse unilatérale de contrat :</strong> L'employeur accorde le droit d'opter au candidat. Il ne manque que l'accord du bénéficiaire. La rétractation de l'employeur n'empêche pas la formation du contrat et équivaut à un <strong>licenciement sans cause réelle et sérieuse</strong>.</li></ul><h3>3. Formalités obligatoires</h3><ul><li><strong>DPAE</strong> à l'Urssaf : au plus tôt 8 jours avant, au plus tard la veille.</li><li><strong>Registre unique du personnel</strong> dans l'ordre d'embauche.</li></ul><h3>4. Travail dissimulé</h3><ul><li>Sanctions pénales : <strong>3 ans prison + 45 000 €</strong></li><li>Indemnité pour le salarié : <strong>6 mois de salaire forfaitaire</strong> (cumulable avec les autres indemnités de rupture).</li></ul>`},
+  {num:5,title:"Le contrat de travail et ses clauses",partie:"2 — Embauche et contrats",content:`<h2>Fiche 5 — Le contrat de travail et ses clauses</h2><h3>1. Les 3 critères du contrat de travail</h3><p>Le code du travail ne définit pas le contrat de travail. C'est la jurisprudence qui a dégagé 3 critères cumulatifs : <strong>une prestation de travail, une rémunération, et un lien de subordination juridique</strong> (le critère décisif).</p><div class="key-point"><strong>Plateformes (Uber, Deliveroo) :</strong> La Cour de cassation requalifie régulièrement les travailleurs indépendants en salariés s'il existe un pouvoir de direction (ordres, itinéraires, tarifs imposés par l'algorithme), de contrôle (géolocalisation) et de sanction (déconnexion du compte en cas de refus de courses).</div><h3>2. La période d'essai (CDI)</h3><div class="table-wrapper"><table class="data-table"><tr><th>Catégorie</th><th>Durée max légale</th></tr><tr><td>Ouvriers / Employés</td><td>2 mois (max 4 mois si renouvelée)</td></tr><tr><td>Agents de maîtrise / Techniciens</td><td>3 mois (max 6 mois si renouvelée)</td></tr><tr><td>Cadres</td><td>4 mois (max 8 mois si renouvelée)</td></tr></table></div><p>Le renouvellement nécessite un accord de branche étendu, une clause dans le contrat et l'accord exprès du salarié.</p><h3>3. Les clauses autorisées (si justifiées)</h3><ul><li><strong>Non-concurrence :</strong> Valable à 5 conditions : 1) Limitée dans le temps, 2) Limitée dans l'espace, 3) Nécessaire aux intérêts de l'entreprise, 4) Tient compte des spécificités de l'emploi, 5) <strong>Comporte une contrepartie financière</strong> non dérisoire (sinon, nullité).</li><li><strong>Mobilité :</strong> Doit définir précisément la zone géographique (pas d'extension unilatérale). Sa mise en œuvre doit répondre à l'intérêt de l'entreprise (pas d'intention de nuire).</li><li><strong>Dédit-formation :</strong> Remboursement des frais de formation si départ anticipé. Nulle si la rupture est imputable à l'employeur ou si elle concerne le temps de travail effectif maintenu.</li><li><strong>Exclusivité :</strong> Interdit de travailler ailleurs. Souvent incompatible avec un contrat à temps partiel.</li></ul><h3>4. Les clauses totalement interdites</h3><ul><li><strong>Clauses couperet :</strong> Rupture automatique du contrat à un âge donné (ex: âge de la retraite).</li><li><strong>Clauses compromissoires :</strong> Soumettre les litiges à un arbitre privé au lieu des Prud'hommes.</li><li><strong>Clauses d'indexation :</strong> Indexer le salaire sur le SMIC ou l'inflation générale.</li><li><strong>Clauses de célibat :</strong> Atteinte aux libertés individuelles, nulles de plein droit.</li></ul>`},
+  {num:6,title:"Les différents contrats de travail",partie:"2 — Embauche et contrats",content:`<h2>Fiche 6 — Les différents contrats de travail</h2><h3>1. CDD — Cas de recours interdits</h3><ul><li>Remplacement d'un salarié <strong>gréviste</strong></li><li>Travaux particulièrement <strong>dangereux</strong> (sauf dérogation)</li><li>Dans les <strong>6 mois</strong> suivant un licenciement économique</li></ul><h3>2. Durées maximales CDD</h3><div class="table-wrapper"><table class="data-table"><tr><th>Cas</th><th>Durée max</th></tr><tr><td>Règle générale (renouvellement inclus)</td><td>18 mois</td></tr><tr><td>CDD sénior / à objet défini</td><td>36 mois</td></tr><tr><td>Attente suppression de poste / commande export</td><td>24 mois</td></tr><tr><td>Attente CDI / travaux urgents sécurité</td><td>9 mois</td></tr><tr><td>Accroissement temporaire après licenciement éco</td><td>3 mois</td></tr></table></div><div class="key-point"><strong>Délai de carence :</strong> Il faut attendre 1/3 de la durée du contrat précédent avant de réembaucher en CDD sur le même poste (1/2 si CDD &lt; 15 jours). Défaut de carence = requalification en CDI. Le contrat doit être transmis dans les <strong>2 jours</strong>.</div><h3>3. Fin du CDD</h3><ul><li>Indemnité de <strong>précarité : 10 %</strong> du salaire brut</li><li>Indemnité de congés payés : <strong>10 %</strong></li></ul><h3>4. Travail temporaire et Portage</h3><ul><li>Intérim : Contrat de mise à disposition + contrat de mission. Précarité 10% + IFM 10%.</li><li>Portage salarial : Rémunération min de 70% à 85% du plafond SS. Max 36 mois chez un client.</li></ul>`},
+  {num:7,title:"Le pouvoir de l'employeur",partie:"3 — Exécution du contrat",content:`<h2>Fiche 7 — Le pouvoir de l'employeur</h2><h3>1. Règlement intérieur</h3><ul><li>Obligatoire : entreprises ≥ <strong>50 salariés</strong> (12 mois consécutifs)</li><li>4 domaines uniquement : santé/sécurité, discipline, droits de la défense, rappel harcèlement</li><li>Procédure : avis CSE → inspecteur du travail → dépôt → affichage</li><li>Entre en vigueur <strong>1 mois minimum</strong> après dépôt</li></ul><h3>2. Sanctions disciplinaires</h3><div class="table-wrapper"><table class="data-table"><tr><th>Sanction</th><th>Procédure</th></tr><tr><td>Avertissement, blâme sans inscription</td><td>Notification écrite motivée</td></tr><tr><td>Mise à pied, mutation, rétrogradation</td><td>Procédure contradictoire (convocation + entretien + notification dans le mois)</td></tr><tr><td>Licenciement disciplinaire</td><td>Procédure contradictoire + procédure licenciement</td></tr></table></div><div class="key-point"><strong>Prescription :</strong> 2 mois après connaissance de la faute. Une faute ne peut être sanctionnée qu'une fois. Effacement du dossier après 3 ans.</div><h3>3. Surveillance</h3><ul><li>Messages ordi pro = <strong>présumés professionnels</strong></li><li>Fichiers "personnels" = vie privée protégée</li><li>Tout système de contrôle (vidéo, géolocalisation) doit être déclaré au CSE et au salarié avant utilisation.</li></ul>`},
+  {num:8,title:"La durée du travail",partie:"3 — Exécution du contrat",content:`<h2>Fiche 8 — La durée du travail</h2><div class="key-point"><strong>Durée légale :</strong> 35 heures de travail effectif par semaine.</div><h3>1. Heures supplémentaires</h3><ul><li>Contingent annuel : <strong>220 h</strong> (sauf accord de branche)</li><li>Majoration légale : <strong>25 %</strong> pour les 8 premières h/sem, <strong>50 %</strong> au-delà</li><li>Accord d'entreprise : peut descendre la majoration à <strong>10 %</strong> minimum</li></ul><h3>2. Durées maximales</h3><div class="table-wrapper"><table class="data-table"><tr><th>Limite</th><th>Durée</th></tr><tr><td>Maximum journalier</td><td>10 h (dérogation jusqu'à 12 h)</td></tr><tr><td>Maximum hebdomadaire absolu</td><td>48 h</td></tr><tr><td>Maximum hebdomadaire sur 12 semaines</td><td>44 h en moyenne</td></tr></table></div><h3>3. Repos obligatoires</h3><ul><li>Repos quotidien : <strong>11 h</strong> consécutives minimum</li><li>Repos hebdomadaire : <strong>35 h</strong> consécutives (dimanche en principe)</li><li>Pause : <strong>20 min</strong> après 6 h de travail effectif</li></ul><h3>4. Aménagements</h3><ul><li>Annualisation : 1 607 h/an (accord collectif)</li><li>Forfait jours : cadres autonomes uniquement (accord collectif obligatoire)</li><li>Temps partiel : mini <strong>24 h/sem</strong> (sauf accord de branche ou demande salarié)</li></ul>`},
+  {num:9,title:"Les repos et congés",partie:"3 — Exécution du contrat",content:`<h2>Fiche 9 — Les repos et congés</h2><h3>1. Congés payés</h3><ul><li><strong>2,5 jours ouvrables</strong> par mois = <strong>30 jours</strong> (5 semaines) par an</li><li>Période de référence : 1er juin au 31 mai</li><li>Congé principal : <strong>4 semaines consécutives</strong> entre mai et octobre</li></ul><h3>2. Congés pour événements familiaux</h3><div class="table-wrapper"><table class="data-table"><tr><th>Événement</th><th>Durée</th></tr><tr><td>Mariage du salarié</td><td>4 jours</td></tr><tr><td>Mariage d'un enfant</td><td>1 jour</td></tr><tr><td>Naissance / adoption</td><td>3 jours</td></tr><tr><td>Décès conjoint / partenaire</td><td>3 jours</td></tr><tr><td>Décès enfant (≥ 25 ans)</td><td>5 jours</td></tr><tr><td>Décès enfant (&lt; 25 ans)</td><td>12 jours</td></tr><tr><td>Décès parent</td><td>3 jours</td></tr></table></div><h3>3. Congé parental d'éducation</h3><p>Droit pour tout salarié avec 1 an d'ancienneté, à la naissance ou adoption d'enfant &lt; 3 ans. Durée : 1 an renouvelable 2 fois (jusqu'aux 3 ans de l'enfant).</p><h3>4. Congé paternité</h3><p><strong>25 jours calendaires</strong> (32 pour naissances multiples). Obligatoirement pris dans les 6 mois suivant la naissance.</p>`},
+  {num:10,title:"La formation professionnelle",partie:"3 — Exécution du contrat",content:`<h2>Fiche 10 — La formation professionnelle</h2><h3>1. Obligations de l'employeur</h3><ul><li>Adapter les salariés à leur poste</li><li>Veiller au maintien de leur employabilité</li><li>Entretien professionnel tous les <strong>2 ans</strong></li></ul><div class="key-point"><strong>Sanction bilan 6 ans :</strong> Si pas d'entretien tous les 2 ans ET aucune formation → abondement CPF de <strong>3 000 €</strong>.</div><h3>2. CPF (Compte Personnel de Formation)</h3><ul><li>Alimentation : <strong>500 €/an</strong> (800 € non-qualifiés)</li><li>Plafond : <strong>5 000 €</strong> (8 000 € non-qualifiés)</li><li>Attaché à la personne, pas à l'employeur</li><li>Mobilisable sans accord employeur (hors temps de travail)</li></ul><h3>3. Plan de développement des compétences</h3><ul><li>Actions d'adaptation au poste : obligatoires, pendant le temps de travail, rémunérées</li><li>Actions de développement : maintien dans l'emploi ou évolution</li></ul>`},
+  {num:11,title:"La santé et la sécurité",partie:"3 — Exécution du contrat",content:`<h2>Fiche 11 — La santé et la sécurité</h2><h3>1. Obligations de l'employeur</h3><ul><li>Obligation de sécurité : prendre toutes les mesures de prévention</li><li>Évaluer les risques et mettre à jour le <strong>DUERP</strong></li></ul><h3>2. Accident du travail</h3><ul><li>Survenu <strong>par le fait ou à l'occasion du travail</strong></li><li>Présomption d'imputabilité pendant le temps de travail</li><li>Accident de trajet : protection comparable mais moindre que l'AT (pas de protection contre le licenciement renforcée).</li></ul><h3>3. Inaptitude</h3><ul><li>Constatée par le médecin du travail</li><li>Obligation de reclassement préalable</li><li>Si impossible → licenciement pour inaptitude</li><li>Indemnité doublée si inaptitude d'origine professionnelle</li></ul><div class="key-point"><strong>Harcèlement moral :</strong> Agissements répétés dégradant les conditions de travail. Sanction : 2 ans + 30 000 €.</div><div class="key-point"><strong>Harcèlement sexuel :</strong> Propos ou comportements à connotation sexuelle imposés. Sanction : 2 ans + 30 000 €.</div>`},
+  {num:12,title:"Le salaire, participation, intéressement",partie:"3 — Exécution du contrat",content:`<h2>Fiche 12 — Le salaire, la participation et l'épargne salariale</h2><h3>1. Salaire</h3><ul><li><strong>SMIC</strong> : revalorisé chaque 1er janvier + automatiquement si inflation &gt; 2 %</li><li>Bulletin de paie obligatoire à chaque paiement</li><li>Égalité de rémunération H/F pour travail de valeur égale</li></ul><h3>2. Protection du salaire</h3><ul><li>Saisie-arrêt limitée selon barème légal</li><li>AGS garantit les salaires impayés en cas de procédure collective</li></ul><h3>3. Participation</h3><p>Obligatoire pour entreprises ≥ <strong>50 salariés</strong>. Calculée selon formule légale. Bloquée <strong>5 ans</strong> (sauf déblocage anticipé).</p><h3>4. Intéressement</h3><p>Facultatif, lié aux résultats. Accord collectif obligatoire. Bloqué <strong>5 ans</strong>.</p><h3>5. PEE / PER collectif</h3><ul><li><strong>PEE</strong> : blocage 5 ans</li><li><strong>PER collectif</strong> : blocage jusqu'à la retraite</li><li>Abondement employeur exonéré de charges (dans les limites légales)</li></ul>`},
+  {num:13,title:"La modification du contrat de travail",partie:"4 — Modification et suspension",content:`<h2>Fiche 13 — La modification du contrat de travail</h2><div class="key-point"><strong>Distinction clé :</strong> Modification d'un élément essentiel (accord salarié requis) ≠ Changement des conditions de travail (pouvoir de direction unilatéral).</div><h3>1. Éléments essentiels du contrat</h3><ul><li>Rémunération</li><li>Durée du travail</li><li>Lieu de travail (hors secteur géographique ou clause de mobilité)</li><li>Qualification / nature des fonctions</li></ul><h3>2. Procédure pour modification économique</h3><ul><li>Notification au salarié par LRAR</li><li>Délai de réflexion : <strong>1 mois</strong> (15 jours en liquidation/redressement)</li><li>Silence = acceptation</li><li>Refus = licenciement économique</li></ul><h3>3. Accord de performance collective</h3><p>Peut modifier rémunération, durée, lieu. Refus du salarié = licenciement pour motif personnel (cause réelle et sérieuse). Délai : 1 mois pour refuser + abondement CPF.</p><h3>4. Art. L1224-1 — Transfert d'entreprise</h3><p>En cas de vente, fusion, apport partiel… : les contrats de travail se poursuivent automatiquement avec le nouvel employeur aux mêmes conditions.</p>`},
+  {num:14,title:"La suspension du contrat de travail",partie:"4 — Modification et suspension",content:`<h2>Fiche 14 — La suspension du contrat de travail</h2><h3>1. Congé maternité</h3><div class="table-wrapper"><table class="data-table"><tr><th>Situation</th><th>Avant accouchement</th><th>Après accouchement</th></tr><tr><td>1er ou 2e enfant</td><td>6 semaines</td><td>10 semaines</td></tr><tr><td>3e enfant ou plus</td><td>8 semaines</td><td>18 semaines</td></tr><tr><td>Jumeaux</td><td>12 semaines</td><td>22 semaines</td></tr></table></div><div class="key-point"><strong>Interdiction absolue</strong> de licencier pendant le congé maternité. <strong>Protection relative</strong> pendant les 10 semaines suivant le retour (sauf faute grave non liée à la grossesse).</div><h3>2. Maladie ordinaire et accident non professionnel</h3><ul><li>Salarié doit prévenir l'employeur dans les <strong>48 heures</strong></li><li>IJ SS : après <strong>3 jours</strong> de carence = 50 % du SJR plafonné</li><li>Visite de reprise obligatoire si arrêt &gt; <strong>30 jours</strong></li></ul><div class="key-point"><strong>Licenciement pour maladie :</strong> interdit en raison de l'état de santé. Autorisé uniquement si : inaptitude OU absences prolongées/répétées perturbant l'entreprise nécessitant un remplacement <strong>définitif</strong>.</div><h3>3. Accident du travail et maladie professionnelle</h3><ul><li>Présomption d'imputabilité pendant le temps et sur le lieu de travail</li><li>IJ : versées <strong>dès le 1er jour</strong> (pas de délai de carence)</li><li>Protection renforcée : licenciement interdit sauf faute grave ou impossibilité maintien</li></ul><div class="key-point"><strong>Inaptitude d'origine professionnelle :</strong> indemnité de licenciement <strong>doublée</strong>.</div>`},
+  {num:15,title:"Le licenciement",partie:"5 — Rupture du contrat",content:`<h2>Fiche 15 — Le licenciement</h2><h3>1. Cause réelle et sérieuse</h3><p>Le motif doit être : <strong>existant, exact et objectif</strong> (faits précis et vérifiables).</p><h3>2. Types de fautes</h3><div class="table-wrapper"><table class="data-table"><tr><th>Faute</th><th>Conséquences</th></tr><tr><td>Faute simple/sérieuse</td><td>Préavis + indemnités de licenciement</td></tr><tr><td>Faute grave</td><td>Pas de préavis ni d'indemnités de licenciement (rupture immédiate)</td></tr><tr><td>Faute lourde</td><td>Pas de préavis, ni d'indemnités + <strong>intention de nuire</strong> (peut entraîner des Dommages & Intérêts)</td></tr></table></div><h3>3. Procédure licenciement personnel</h3><ul><li><strong>Convocation</strong> par LRAR ou remise en main propre</li><li>Délai minimum convocation → entretien : <strong>5 jours ouvrables</strong></li><li><strong>Entretien préalable</strong> : employeur expose les motifs, salarié peut être assisté</li><li><strong>Notification</strong> par LRAR, motif précis obligatoire</li><li>Délai notification : pas moins d'<strong>1 jour franc</strong> ni plus d'<strong>1 mois</strong> après entretien</li></ul><h3>4. Licenciement économique</h3><p>Pour motifs non inhérents à la personne : difficultés économiques, mutations technologiques, réorganisation pour sauvegarder la compétitivité, cessation d'activité.</p><div class="key-point"><strong>Obligation préalable de reclassement :</strong> Chercher un emploi équivalent dans l'entreprise ou le groupe avant tout licenciement économique.</div>`},
+  {num:16,title:"Les autres modes de rupture",partie:"5 — Rupture du contrat",content:`<h2>Fiche 16 — Les autres modes de rupture</h2><h3>1. Démission</h3><ul><li>Volonté claire et non équivoque du salarié</li><li>Préavis obligatoire (sauf faute grave employeur)</li><li>Pas d'indemnités de licenciement</li><li>Pas de droit au chômage (sauf cas de démissions légitimes reconnus)</li></ul><h3>2. Rupture conventionnelle individuelle</h3><ul><li>Accord entre employeur et salarié (ne peut être imposée)</li><li>Entretien(s) préalable(s) obligatoire(s)</li><li>Délai de rétractation : <strong>15 jours calendaires</strong> pour chaque partie</li><li>Homologation DREETS : délai d'instruction de <strong>15 jours ouvrables</strong></li><li>Indemnité ≥ indemnité légale de licenciement</li><li>Droit aux allocations chômage (ARE)</li></ul><h3>3. Prise d'acte de la rupture</h3><p>Le salarié prend acte de la rupture en raison de manquements graves de l'employeur. Le juge requalifie ensuite : licenciement sans CRS (si manquements établis) ou démission (si non établis).</p><h3>4. Mise à la retraite</h3><ul><li>L'employeur peut mettre à la retraite à <strong>70 ans</strong> sans accord</li><li>Entre 67 et 70 ans : accord du salarié requis</li></ul>`},
+  {num:17,title:"Les conséquences de la rupture",partie:"5 — Rupture du contrat",content:`<h2>Fiche 17 — Les conséquences de la rupture</h2><h3>1. Préavis</h3><ul><li>Commence à la notification de la rupture</li><li>Dispense possible avec indemnité compensatrice de préavis</li><li>Durée fixée par convention collective, usage ou loi</li></ul><h3>2. Indemnité légale de licenciement</h3><p>Ancienneté minimale requise : <strong>8 mois</strong> ininterrompus.</p><div class="table-wrapper"><table class="data-table"><tr><th>Ancienneté</th><th>Calcul</th></tr><tr><td>Jusqu'à 10 ans</td><td>1/4 de mois de salaire par année</td></tr><tr><td>Au-delà de 10 ans</td><td>1/3 de mois de salaire par année</td></tr></table></div><h3>3. Documents de fin de contrat obligatoires</h3><ul><li><strong>Certificat de travail</strong> : dates, emploi occupé, portabilité mutuelle</li><li><strong>Attestation France Travail</strong> (Pôle Emploi)</li><li><strong>Solde de tout compte</strong> : contestable dans les <strong>6 mois</strong> s'il est signé (3 ans sinon)</li></ul><h3>4. Clause de non-concurrence</h3><p>S'applique dès la rupture. L'employeur peut y renoncer dans le délai prévu par le contrat. L'indemnité compensatrice financière est due <strong>même en cas de démission</strong>.</p>`},
+  {num:18,title:"La négociation collective",partie:"6 — Aspects collectifs",content:`<h2>Fiche 18 — La négociation collective</h2><h3>1. Hiérarchie des normes (post-ordonnances Macron)</h3><p><strong>L'accord d'entreprise prime sur l'accord de branche</strong>, y compris s'il est moins favorable, SAUF dans les domaines verrouillés.</p><h3>2. Domaines verrouillés (la branche prime toujours)</h3><ul><li>Salaires minima</li><li>Classifications</li><li>Garanties collectives complémentaires</li><li>Mutualisation de la formation</li><li>Égalité professionnelle H/F</li></ul><h3>3. Validité d'un accord d'entreprise</h3><p>Il doit être signé par des syndicats représentant <strong>≥ 50 %</strong> des suffrages exprimés au 1er tour des élections (ou 30 % + référendum d'entreprise validé par les salariés).</p><h3>4. NAO — Négociations Annuelles Obligatoires</h3><ul><li>Entreprises ≥ <strong>50 salariés</strong> avec délégué syndical</li><li>Thèmes : Rémunérations, temps de travail, partage de la valeur, Égalité H/F.</li></ul>`},
+  {num:19,title:"Les syndicats dans l'entreprise",partie:"6 — Aspects collectifs",content:`<h2>Fiche 19 — Les syndicats dans l'entreprise</h2><h3>1. Représentativité syndicale</h3><p>Critères cumulatifs : valeurs républicaines, indépendance, transparence financière, ancienneté ≥ 2 ans, audience ≥ <strong>10 %</strong> en entreprise (8 % au niveau national).</p><h3>2. Délégué syndical (DS)</h3><ul><li>Désigné dans entreprises ≥ <strong>50 salariés</strong></li><li>Représente le syndicat + a le monopole de la négociation des accords</li><li>Heures de délégation : 12 h/mois (18 h pour 150-499 sal., 24 h pour ≥ 500)</li></ul><div class="key-point"><strong>Salarié protégé :</strong> Le licenciement nécessite l'autorisation de l'inspecteur du travail pendant le mandat et <strong>12 mois</strong> après sa fin.</div>`},
+  {num:20,title:"La représentation des salariés (CSE)",partie:"6 — Aspects collectifs",content:`<h2>Fiche 20 — La représentation des salariés (CSE)</h2><h3>1. CSE — Seuils et mise en place</h3><div class="table-wrapper"><table class="data-table"><tr><th>Effectif</th><th>Obligations</th></tr><tr><td>11 à 49 salariés</td><td>CSE avec attributions des anciens DP (Délégués du personnel)</td></tr><tr><td>≥ 50 salariés</td><td>CSE avec toutes les attributions (CE + CHSCT)</td></tr><tr><td>≥ 300 salariés</td><td>CSSCT (Commission Santé, Sécurité) obligatoire</td></tr></table></div><h3>2. Élections</h3><ul><li>Durée du mandat : <strong>4 ans</strong> (maximum 3 mandats successifs)</li><li>1er tour : réservé aux syndicats représentatifs</li><li>2e tour si quorum non atteint (50 %) ou sièges vacants : listes libres</li></ul><h3>3. Attributions (≥ 50 salariés)</h3><ul><li>Consultations récurrentes : orientations stratégiques, situation économique, politique sociale</li><li>Droits d'alerte (économique, social, danger grave et imminent)</li><li>Gestion des activités sociales et culturelles (ASC)</li></ul>`},
+  {num:21,title:"Le statut des représentants des salariés",partie:"6 — Aspects collectifs",content:`<h2>Fiche 21 — Le statut des représentants des salariés</h2><h3>1. Protection contre le licenciement</h3><ul><li>Autorisation préalable de <strong>l'inspecteur du travail</strong> obligatoire pour tout licenciement, rupture conventionnelle ou mise à la retraite.</li><li>Protection pendant le mandat + <strong>6 mois</strong> après son expiration pour le CSE (12 mois pour le DS).</li><li>Candidats aux élections protégés pendant <strong>6 mois</strong> (loi récente, anciennement 3 mois).</li></ul><h3>2. Heures de délégation</h3><div class="table-wrapper"><table class="data-table"><tr><th>Mandat</th><th>Heures / mois</th></tr><tr><td>CSE (11-49 sal.)</td><td>10 h</td></tr><tr><td>CSE (50-299 sal.)</td><td>22 h</td></tr><tr><td>Délégué syndical (&lt; 150 sal.)</td><td>12 h</td></tr><tr><td>Délégué syndical (150-499 sal.)</td><td>18 h</td></tr><tr><td>Délégué syndical (≥ 500 sal.)</td><td>24 h</td></tr></table></div><h3>3. Exercice du mandat</h3><ul><li>Heures de délégation = considérées comme du temps de travail effectif pour la paie</li><li>Liberté de déplacement dans et hors de l'entreprise pendant les heures</li><li>Non-discrimination dans la carrière et la rémunération</li></ul>`},
+  {num:22,title:"Les conflits collectifs",partie:"6 — Aspects collectifs",content:`<h2>Fiche 22 — Les conflits collectifs</h2><h3>1. Droit de grève</h3><p>Droit constitutionnel. Cessation collective, concertée et totale du travail pour des revendications professionnelles.</p><ul><li>Pas de préavis obligatoire dans le secteur privé (contrairement au secteur public)</li><li>Suspend le contrat (ne le rompt pas)</li><li>Salaire non versé au prorata du temps de grève</li><li>Seule la <strong>faute lourde</strong> (intention de nuire) justifie le licenciement d'un gréviste</li></ul><div class="key-point"><strong>Grèves illicites :</strong> grève politique pure, grève perlée (ralentissement), lock-out patronal (en principe illicite sauf impossibilité absolue de poursuivre l'activité). Remplacer des grévistes par des CDD ou de l'intérim est strictement interdit.</div><h3>2. Modes de résolution</h3><ul><li><strong>Conciliation</strong></li><li><strong>Médiation</strong></li><li><strong>Arbitrage</strong></li></ul>`},
+  {num:23,title:"L'organisation de la Sécurité sociale",partie:"7 — Sécurité sociale",content:`<h2>Fiche 23 — Organisation du régime général</h2><h3>1. Branches du régime général</h3><div class="table-wrapper"><table class="data-table"><tr><th>Branche</th><th>Organisme</th></tr><tr><td>Maladie / maternité / invalidité / décès</td><td>CNAM / CPAM</td></tr><tr><td>AT / Maladies professionnelles</td><td>CNAM / CPAM</td></tr><tr><td>Vieillesse (retraite)</td><td>CNAV / CARSAT</td></tr><tr><td>Famille</td><td>CNAF / CAF</td></tr><tr><td>Recouvrement</td><td>URSSAF / ACOSS</td></tr></table></div><h3>2. Financement</h3><ul><li>Cotisations sociales (part employeur + part salarié)</li><li><strong>CSG</strong> (Contribution Sociale Généralisée, sur tous les revenus)</li><li><strong>CRDS</strong> (Contribution au Remboursement de la Dette Sociale)</li></ul><h3>3. PUMA</h3><p>Protection Universelle Maladie : toute personne résidant en France de manière stable et régulière a accès à la prise en charge de ses frais de santé.</p>`},
+  {num:24,title:"Les prestations sociales",partie:"7 — Sécurité sociale",content:`<h2>Fiche 24 — Les prestations sociales</h2><h3>1. Maladie ordinaire</h3><ul><li>Remboursement des soins (ticket modérateur à charge)</li><li>Indemnités Journalières (IJ) : après <strong>3 jours</strong> de carence ; <strong>50 %</strong> du SJR (Salaire Journalier de Référence) plafonné</li><li>Durée max : <strong>3 ans</strong> (ALD : prise en charge 100 %)</li></ul><h3>2. Maternité</h3><ul><li>Frais médicaux pris en charge à <strong>100 %</strong></li><li>IJ maternité = <strong>100 %</strong> du SJR plafonné (aucun délai de carence)</li></ul><h3>3. Invalidité</h3><div class="table-wrapper"><table class="data-table"><tr><th>Catégorie</th><th>Pension</th></tr><tr><td>1re (peut encore travailler)</td><td>30 % du salaire annuel moyen des 10 meilleures années</td></tr><tr><td>2e (ne peut plus travailler)</td><td>50 % du salaire annuel moyen</td></tr><tr><td>3e (besoin tierce personne)</td><td>50 % + majoration pour tierce personne</td></tr></table></div><h3>4. Famille</h3><ul><li>Allocations familiales : versées à partir de <strong>2 enfants</strong> à charge</li><li>PAJE pour enfant &lt; 3 ans</li></ul>`},
+  {num:25,title:"L'activité partielle et le chômage",partie:"8 — Assurance chômage",content:`<h2>Fiche 25 — L'activité partielle et le chômage</h2><h3>1. Activité partielle (Chômage partiel)</h3><ul><li>Autorisation de la DREETS requise</li><li>Indemnisation du salarié : <strong>60 %</strong> de la rémunération brute (soit environ 72% du net)</li><li>APLD (Longue Durée) : par accord collectif, jusqu'à 24 mois sur 36.</li></ul><h3>2. Conditions d'accès à l'ARE (Assurance Chômage)</h3><ul><li>Avoir travaillé ≥ <strong>6 mois</strong> (130 jours ou 910 heures) dans les 24 derniers mois (36 mois pour les &gt; 53 ans)</li><li>Rupture involontaire (licenciement, fin de CDD), rupture conventionnelle ou prise d'acte. La démission classique n'ouvre pas de droits.</li><li>Être inscrit à France Travail (Pôle Emploi), être apte physiquement et en recherche active.</li></ul><h3>3. Calcul et durée de l'ARE</h3><ul><li>Base : SJR (Salaire Journalier de Référence)</li><li>Durée max : <strong>18 mois</strong> (22,5 mois pour 53-54 ans, 27 mois pour ≥ 55 ans) - <em>Suite réforme de modulation 2023</em></li></ul><div class="key-point"><strong>Carence :</strong> 7 jours incompressibles + différé d'indemnisation si le salarié a perçu des indemnités de rupture supra-légales ou des congés payés.</div>`},
+  {num:26,title:"L'aide sociale",partie:"9 — Aide sociale et complémentaires",content:`<h2>Fiche 26 — L'aide sociale</h2><h3>1. RSA (Revenu de Solidarité Active)</h3><ul><li>Versé par la CAF</li><li>Pour les ≥ 25 ans (ou parent isolé dès 18 ans)</li><li>Contrepartie : Obligation d'engagement dans une démarche d'insertion professionnelle ou sociale (Contrat d'Engagement).</li></ul><h3>2. AAH (Allocation aux Adultes Handicapés)</h3><ul><li>Taux d'incapacité ≥ 80 % (ou 50-80 % avec restriction substantielle d'accès à l'emploi)</li><li>Versée par la CAF sur décision de la <strong>MDPH</strong> (Maison Départementale des Personnes Handicapées)</li></ul><h3>3. C2S (Complémentaire Santé Solidaire)</h3><p>Protection complémentaire gratuite ou à moins de 1€/jour pour les personnes à faibles ressources. Remplace l'ancienne CMU-C et l'ACS. Prise en charge du ticket modérateur et du forfait journalier hospitalier.</p><h3>4. Prime d'activité</h3><p>Complément de revenus pour les travailleurs (salariés ou indépendants) à revenus modestes. Versée par la CAF, accessible dès 18 ans.</p>`},
+  {num:27,title:"Les régimes complémentaires",partie:"9 — Aide sociale et complémentaires",content:`<h2>Fiche 27 — Les régimes complémentaires</h2><h3>1. Retraite complémentaire (AGIRC-ARRCO)</h3><ul><li>Obligatoire pour tous les salariés du secteur privé.</li><li>Fonctionnement par répartition et en <strong>points</strong> : les cotisations achètent des points, qui sont convertis en pension à la retraite.</li><li>Gestion paritaire (syndicats et patronat).</li></ul><h3>2. Prévoyance complémentaire</h3><ul><li>Couvre les gros risques : décès, invalidité, incapacité.</li><li>Obligatoire pour les cadres (pour le risque décès). Obligatoire dans certaines branches pour les non-cadres.</li></ul><h3>3. Complémentaire santé d'entreprise (Mutuelle)</h3><ul><li>Obligatoire dans toutes les entreprises privées depuis le <strong>1er janvier 2016</strong>.</li><li>Part patronale ≥ <strong>50 %</strong> de la cotisation.</li><li>Garanties minimales : respect du panier de soins ANI.</li></ul><div class="key-point"><strong>Portabilité :</strong> En cas de rupture (sauf faute lourde) ouvrant droit au chômage, le salarié conserve ses droits complémentaires santé et prévoyance gratuitement pendant une durée = à son ancienneté (maximum <strong>12 mois</strong>).</div>`},
+  {num:28,title:"Le contentieux social",partie:"10 — Contentieux",content:`<h2>Fiche 28 — Le contentieux social</h2><h3>1. Juridictions compétentes</h3><div class="table-wrapper"><table class="data-table"><tr><th>Litige</th><th>Juridiction compétente</th></tr><tr><td>Litige individuel lié au contrat de travail</td><td>Conseil de prud'hommes (CPH)</td></tr><tr><td>Litige lié à la Sécurité sociale (AT/MP, cotisations...)</td><td>Pôle social du Tribunal Judiciaire (TJ)</td></tr><tr><td>Contestation d'une décision de l'inspecteur du travail</td><td>Tribunal administratif</td></tr><tr><td>Conflits collectifs urgents (grève illicite)</td><td>TJ en référé</td></tr></table></div><h3>2. Procédure Sécurité Sociale</h3><ul><li>Recours préalable <strong>obligatoire</strong> devant la <strong>CRA</strong> (Commission de recours amiable) de la CPAM ou de l'Urssaf.</li><li>Délai de saisine : <strong>2 mois</strong> à compter de la notification de la décision.</li><li>Appel possible devant la Cour d'appel (chambre sociale).</li></ul><div class="key-point">Le <strong>rescrit social</strong> permet à un employeur d'interroger l'Urssaf sur sa situation pour obtenir une garantie juridique avant tout contrôle. L'Urssaf a 3 mois pour répondre.</div>`}
+];
 
 // =============================================
-// NAVIGATION & INTERFACE
+// DATA — FLASHCARDS
 // =============================================
-function showScreen(name, updateHash = true) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.top-nav-tab, .bottom-nav-item').forEach(t => t.classList.remove('active'));
-  
-  const screenEl = document.getElementById('screen-' + name) || document.getElementById('screen-home');
-  screenEl.classList.add('active');
-  
-  const map = { home: 0, fiches: 1, flashcards: 2, quiz: 3, recap: 4, blog: 5, chat: 6 };
-  if (map[name] !== undefined) {
-    document.querySelectorAll('.top-nav-tab')[map[name]]?.classList.add('active');
-    document.querySelectorAll('.bottom-nav-item')[map[name]]?.classList.add('active');
-  }
-
-  if (updateHash) window.location.hash = name;
-
-  if (name === 'home') updateHomeStats();
-  if (name === 'fiches') renderFichesList();
-  if (name === 'flashcards') initFlashcards();
-  if (name === 'quiz') initQuiz();
-  if (name === 'recap') renderRecap();
-  if (name === 'blog') loadBlog();
-  if (name === 'chat') {
-    if (!isPremium()) {
-      openPremium(() => showScreen('chat'));
-      return;
-    }
-  }
-
-  window.scrollTo(0, 0);
-}
-
-function updateHomeStats() {
-  document.getElementById('stat-fiches').textContent = state.readFiches.length;
-  const knownCards = Object.values(state.flashcards).filter(lvl => lvl >= 3).length;
-  document.getElementById('stat-known').textContent = knownCards;
-  document.getElementById('stat-quiz').textContent = state.quizHighscore ? state.quizHighscore + '%' : '—';
-  
-  const globalProgress = document.getElementById('global-progress');
-  if(globalProgress) globalProgress.textContent = `${state.readFiches.length}/${FICHES.length}`;
-}
-
-// =============================================
-// SYSTÈME PREMIUM (KO-FI & CLOUDFLARE)
-// =============================================
-function isPremium() {
-  const data = JSON.parse(localStorage.getItem(PREMIUM_KEY) || 'null');
-  if (!data) return false;
-  // Vérification de l'expiration (30 jours)
-  if (Date.now() > data.expiry) { 
-    localStorage.removeItem(PREMIUM_KEY); 
-    return false; 
-  }
-  return true;
-}
-
-function openPremium(action) {
-  pendingPremiumAction = action;
-  document.getElementById('premium-overlay').classList.add('open');
-  document.getElementById('premium-code-input').value = '';
-  document.getElementById('premium-error').style.display = 'none';
-  document.getElementById('premium-code-input').focus();
-}
-
-function closePremium() {
-  document.getElementById('premium-overlay').classList.remove('open');
-  pendingPremiumAction = null;
-}
-
-async function submitPremiumCode() {
-  const code = document.getElementById('premium-code-input').value.trim().toUpperCase();
-  const btn = document.getElementById('premium-submit');
-  const err = document.getElementById('premium-error');
-
-  if (!code) { err.textContent = 'Veuillez entrer un code.'; err.style.display = 'block'; return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Vérification...';
-  err.style.display = 'none';
-
-  try {
-    // VRAIE REQUÊTE VERS TON CLOUDFLARE
-    const res = await fetch(WORKER_URL + '/verify-code', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
-    });
-    const data = await res.json();
-
-    if (data.valid) {
-      localStorage.setItem(PREMIUM_KEY, JSON.stringify({ expiry: data.expiry }));
-      closePremium();
-      showToast('Accès Premium activé !', 'success');
-      if (pendingPremiumAction) {
-        pendingPremiumAction();
-      } else {
-        showScreen('chat', true);
-      }
-    } else {
-      err.textContent = data.reason || 'Code invalide. Vérifiez et réessayez.';
-      err.style.display = 'block';
-    }
-  } catch(e) {
-    err.textContent = 'Erreur de connexion. Réessayez.';
-    err.style.display = 'block';
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Activer mon accès';
-}
-
-document.getElementById('premium-code-input')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitPremiumCode();
-});
+const FLASHCARDS = [
+  {tag:"Sources",q:"Quels sont les 3 critères d'un usage ?",a:"Généralité (accordé à tous), Constance (régulier), Fixité (critères précis). Sans ces 3 critères, c'est un engagement unilatéral."},
+  {tag:"Sources",q:"Depuis les ordonnances Macron, quel accord prime sur l'accord de branche ?",a:"L'accord d'entreprise prime sur l'accord de branche, SAUF dans les domaines verrouillés (salaires minima, classifications, garanties collectives…)."},
+  {tag:"Sources",q:"Quelle est la différence entre directive et règlement européen ?",a:"Le règlement s'applique directement dans tous les États membres. La directive nécessite une transposition dans le droit national de chaque État."},
+  {tag:"CPH",q:"Délai de recours CPH pour un litige lié à la rupture du contrat ?",a:"12 mois à compter de la notification de la rupture."},
+  {tag:"CPH",q:"Délai de recours CPH pour des salaires impayés ?",a:"3 ans."},
+  {tag:"CPH",q:"Délai de recours CPH pour un solde de tout compte signé ?",a:"6 mois à compter de la signature."},
+  {tag:"CPH",q:"Délai de recours CPH pour harcèlement ou discrimination ?",a:"5 ans."},
+  {tag:"CPH",q:"À partir de quel montant l'appel est-il possible devant le CPH ?",a:"Si la demande dépasse 5 000 €. En dessous, seul un pourvoi en cassation est possible (délai : 2 mois)."},
+  {tag:"Embauche",q:"Dans quel délai la DPAE doit-elle parvenir à l'Urssaf ?",a:"Au plus tôt dans les 8 jours précédant l'embauche, au plus tard la veille."},
+  {tag:"Embauche",q:"Quelle est l'obligation d'emploi de travailleurs handicapés ?",a:"6 % de l'effectif pour les entreprises ≥ 20 salariés. Contribution AGEFIPH si non-respect."},
+  {tag:"Embauche",q:"Différence entre une 'offre' et une 'promesse' d'embauche ?",a:"L'offre peut être rétractée (engage juste la responsabilité civile). La promesse engage l'employeur ; s'il se rétracte, c'est un licenciement sans cause réelle et sérieuse."},
+  {tag:"Embauche",q:"Quelles questions l'employeur peut-il poser en entretien ?",a:"Uniquement celles ayant un lien direct et nécessaire avec l'emploi proposé ou l'évaluation des aptitudes professionnelles."},
+  {tag:"Contrat",q:"Quels sont les 3 éléments constitutifs du contrat de travail ?",a:"1) Prestation de travail, 2) Rémunération, 3) Lien de subordination juridique (le critère essentiel)."},
+  {tag:"Contrat",q:"Qu'est-ce qui caractérise le lien de subordination ?",a:"L'exécution d'un travail sous l'autorité d'un employeur qui a le pouvoir de donner des ordres/directives, d'en contrôler l'exécution et de sanctionner les manquements."},
+  {tag:"Contrat",q:"Durée max de la période d'essai pour un cadre en CDI ?",a:"4 mois (renouvelable une fois jusqu'à 8 mois si accord de branche le prévoit)."},
+  {tag:"Contrat",q:"La rupture de l'essai sans délai de prévenance vaut-elle licenciement ?",a:"Non. Elle ouvre uniquement droit à une indemnité compensatrice (salaire dû pendant la période manquante)."},
+  {tag:"Clauses",q:"Quelles sont les 5 conditions de validité d'une clause de non-concurrence ?",a:"Limitée dans le temps, limitée dans l'espace, intérêt légitime de l'entreprise, tient compte des spécificités de l'emploi, ET contrepartie financière non dérisoire."},
+  {tag:"Clauses",q:"Qu'est-ce qu'une clause 'couperet' ?",a:"Une clause prévoyant la rupture automatique du contrat de travail à un âge donné (ex: âge de la retraite). Elle est totalement nulle."},
+  {tag:"Clauses",q:"Une clause compromissoire est-elle valable dans un contrat de travail ?",a:"Non, elle est nulle. Seul le Conseil de Prud'hommes est compétent pour régler les litiges du contrat de travail."},
+  {tag:"Clauses",q:"Qu'est-ce qu'une clause de dédit-formation ?",a:"Une clause obligeant le salarié à rembourser ses frais de formation s'il quitte l'entreprise prématurément de son plein gré."},
+  {tag:"CDD",q:"Durée maximale d'un CDD de droit commun ?",a:"18 mois (renouvellements inclus). Un accord de branche peut y déroger."},
+  {tag:"CDD",q:"Combien de fois un CDD peut-il être renouvelé par défaut ?",a:"2 fois maximum."},
+  {tag:"CDD",q:"Qu'est-ce que le délai de carence entre deux CDD ?",a:"Tiers de la durée du contrat (moitié si CDD < 15 jours) à respecter avant d'embaucher sur le même poste."},
+  {tag:"CDD",q:"Montant de l'indemnité de précarité d'un CDD ?",a:"10 % du salaire brut total."},
+  {tag:"Temps de travail",q:"Taux de majoration légal des 8 premières heures supplémentaires ?",a:"25 %. L'accord d'entreprise peut descendre à 10 % minimum."},
+  {tag:"Temps de travail",q:"Quelle est la durée maximale absolue de travail hebdomadaire ?",a:"48 heures (ou 44 heures en moyenne sur 12 semaines)."},
+  {tag:"Temps de travail",q:"Durée minimale du repos quotidien ?",a:"11 heures consécutives."},
+  {tag:"Congés",q:"Combien de jours de congés payés par an ?",a:"30 jours ouvrables (5 semaines)."},
+  {tag:"Congés",q:"Durée du congé paternité ?",a:"25 jours calendaires (32 pour naissances multiples)."},
+  {tag:"Formation",q:"Montant annuel d'alimentation du CPF ?",a:"500 €/an plafonné à 5 000 € (800 € / 8 000 € pour les non-qualifiés)."},
+  {tag:"Santé",q:"Définition légale du harcèlement moral ?",a:"Agissements répétés dégradant les conditions de travail, portant atteinte à la dignité, la santé physique/mentale ou l'avenir pro du salarié."},
+  {tag:"Santé",q:"Visite de reprise obligatoire après combien de jours d'arrêt maladie ordinaire ?",a:"Après un arrêt de plus de 30 jours."},
+  {tag:"Règlement intérieur",q:"À partir de quel effectif le règlement intérieur est-il obligatoire ?",a:"50 salariés."},
+  {tag:"Discipline",q:"Quel est le délai de prescription des fautes disciplinaires ?",a:"2 mois après connaissance de la faute par l'employeur."},
+  {tag:"Licenciement",q:"Quels sont les 3 critères d'une cause réelle et sérieuse ?",a:"Le motif doit être : existant, exact (conforme à la réalité) et objectif (faits précis et vérifiables)."},
+  {tag:"Licenciement",q:"Différence entre faute grave et faute lourde ?",a:"La faute lourde suppose une intention de nuire à l'employeur. Les deux privent du préavis et des indemnités de licenciement."},
+  {tag:"Licenciement",q:"Délai minimum entre convocation et entretien préalable ?",a:"5 jours ouvrables."},
+  {tag:"Licenciement",q:"À partir de quelle ancienneté a-t-on droit à l'indemnité légale ?",a:"8 mois d'ancienneté ininterrompue."},
+  {tag:"Rupture",q:"Délai de rétractation d'une rupture conventionnelle ?",a:"15 jours calendaires pour chaque partie."},
+  {tag:"Rupture",q:"L'indemnité de non-concurrence est-elle due en cas de démission ?",a:"Oui. Elle est due dans tous les cas de rupture du contrat (démission, licenciement, retraite…), sauf si l'employeur y renonce à temps."},
+  {tag:"Instances",q:"À partir de quel effectif le CSE est-il obligatoire ?",a:"11 salariés."},
+  {tag:"Instances",q:"Durée du mandat des membres du CSE ?",a:"4 ans."},
+  {tag:"Instances",q:"Seuil d'audience pour la représentativité syndicale en entreprise ?",a:"10 % des suffrages exprimés au 1er tour des élections (8 % au niveau national)."},
+  {tag:"Instances",q:"Pendant combien de temps un élu CSE est-il protégé après son mandat ?",a:"6 mois après la fin du mandat (12 mois pour le Délégué Syndical)."},
+  {tag:"Grève",q:"Quelle faute justifie le licenciement d'un gréviste ?",a:"La faute lourde uniquement (intention de nuire)."},
+  {tag:"Grève",q:"La grève rompt-elle le contrat de travail ?",a:"Non, elle le suspend. Le salaire est déduit proportionnellement à l'arrêt."},
+  {tag:"Chômage",q:"Durée minimale de travail pour ouvrir des droits ARE ?",a:"6 mois dans les 24 derniers mois (36 mois pour les + de 53 ans)."},
+  {tag:"Chômage",q:"Quel est le délai de carence à l'ARE ?",a:"7 jours incompressibles (+ différé d'indemnisation si indemnités de rupture supra-légales)."},
+  {tag:"Complémentaires",q:"Qu'est-ce que la portabilité de la mutuelle ?",a:"En cas de rupture ouvrant droit au chômage, maintien gratuit des droits pendant une durée égale au dernier contrat (max 12 mois)."}
+];
 
 // =============================================
-// FICHES DE COURS & VEILLE IA
+// DATA — QUIZ
 // =============================================
-function renderFichesList() {
-  const container = document.getElementById('fiches-list');
-  container.innerHTML = '';
-  
-  const parties = [...new Set(FICHES.map(f => f.partie))];
-  
-  parties.forEach(partie => {
-    const section = document.createElement('div');
-    section.className = 'partie-section';
-    section.innerHTML = `<div class="partie-label">${partie}</div><div class="fiches-row"></div>`;
-    
-    const row = section.querySelector('.fiches-row');
-    FICHES.filter(f => f.partie === partie).forEach(fiche => {
-      const isRead = state.readFiches.includes(fiche.num);
-      const card = document.createElement('div');
-      card.className = 'fiche-card';
-      card.onclick = () => openFiche(fiche.num);
-      card.innerHTML = `
-        <div class="fiche-number">FICHE ${fiche.num}</div>
-        <div class="fiche-title">${fiche.title}</div>
-        ${isRead ? '<div class="fiche-done-badge">✓ LUE</div>' : ''}
-      `;
-      row.appendChild(card);
-    });
-    
-    container.appendChild(section);
-  });
-}
-
-let currentFicheIdx = 0;
-function openFiche(num) {
-  currentFicheIdx = FICHES.findIndex(f => f.num === num);
-  const fiche = FICHES[currentFicheIdx];
-  
-  const contentArea = document.getElementById('fiche-content-area');
-  contentArea.innerHTML = fiche.content;
-  document.getElementById('reader-progress').textContent = `Fiche ${num} sur ${FICHES.length}`;
-  
-  // Bouton "Vérifier Mise à Jour" (Veille IA)
-  const updateBar = document.createElement('div');
-  updateBar.className = 'fiche-update-bar';
-  updateBar.innerHTML = `
-    <button class="fiche-update-btn" id="update-btn-${fiche.num}" onclick="checkFicheUpdate(${currentFicheIdx})">
-      Vérifier si cette fiche est à jour (IA)
-      <span id="update-arrow-${fiche.num}">→</span>
-    </button>
-    <div class="fiche-update-result" id="update-result-${fiche.num}"></div>
-  `;
-  contentArea.appendChild(updateBar);
-
-  if (!state.readFiches.includes(num)) {
-    state.readFiches.push(num);
-    localStorage.setItem('readFiches', JSON.stringify(state.readFiches));
-    updateHomeStats();
-  }
-  
-  const btnNext = document.getElementById('btn-next-fiche');
-  if (currentFicheIdx < FICHES.length - 1) {
-    btnNext.style.display = 'inline-block';
-    btnNext.onclick = () => openFiche(FICHES[currentFicheIdx + 1].num);
-  } else {
-    btnNext.style.display = 'none';
-  }
-
-  showScreen('reader', false);
-}
-
-async function checkFicheUpdate(idx) {
-  if (!isPremium()) { openPremium(() => checkFicheUpdate(idx)); return; }
-  
-  const f = FICHES[idx];
-  const btn = document.getElementById(`update-btn-${f.num}`);
-  const result = document.getElementById(`update-result-${f.num}`);
-  const arrow = document.getElementById(`update-arrow-${f.num}`);
-
-  btn.classList.add('loading');
-  btn.disabled = true;
-  arrow.textContent = '⏳';
-  result.style.display = 'none';
-
-  const content = f.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 1500);
-
-  try {
-    // VRAIE REQUÊTE VERS TON IA CLOUDFLARE POUR LA VEILLE
-    const res = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        mode: 'veille',
-        messages: [{ role: 'user', content: `Analyse cette fiche de droit du travail :\n\nTitre : ${f.title}\n\nContenu : ${content}` }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content?.[0]?.text || '{}';
-    
-    let parsed;
-    try { parsed = JSON.parse(raw); } catch(e) { parsed = { obsolete: false, confiance: 'faible', raison: raw, suggestion: '' }; }
-
-    const isWarn = parsed.obsolete;
-    result.className = `fiche-update-result show ${isWarn ? 'warn' : 'ok'}`;
-    result.innerHTML = `
-      <div class="veille-result-title" style="font-weight:bold;margin-bottom:5px;">
-        ${isWarn ? '⚠️ Potentiellement obsolète' : '✅ À jour'} 
-        <span style="font-size:.72rem;font-weight:400;opacity:.7">(confiance : ${parsed.confiance || 'moyenne'})</span>
-      </div>
-      <div>
-        <strong>Analyse :</strong> ${parsed.raison || '—'}<br>
-        ${parsed.suggestion ? `<strong>Suggestion :</strong> ${parsed.suggestion}` : ''}
-      </div>`;
-    arrow.textContent = isWarn ? '⚠️' : '✅';
-  } catch(e) {
-    result.className = 'fiche-update-result show warn';
-    result.innerHTML = '❌ Impossible de contacter le serveur IA.';
-    arrow.textContent = '❌';
-  }
-  btn.classList.remove('loading');
-  btn.disabled = false;
-}
+const QUIZ = [
+  {q:"La jurisprudence prime-t-elle sur la loi en droit du travail ?",opts:["Oui, toujours","Non, elle précise et interprète la loi","Oui, en matière de contrat","Cela dépend de la juridiction"],correct:1,expl:"La jurisprudence interprète la loi mais ne prime jamais sur elle. Hiérarchie : Constitution → Loi → Conventions → Contrat.",fiche:1,cat:"Sources"},
+  {q:"Un accord d'entreprise peut-il fixer la majoration des heures supp' à 12 % ?",opts:["Non, le minimum est 25 %","Oui, il prime et la loi fixe un plancher à 10 %","Non, la branche prime"],correct:1,expl:"L'accord d'entreprise prime sur la branche pour la majoration des HS, mais ne peut descendre sous 10 %.",fiche:1,cat:"Sources"},
+  {q:"Que se passe-t-il si un employeur se rétracte d'une 'promesse unilatérale' d'embauche acceptée ?",opts:["Rien, il a le droit","C'est une rupture de période d'essai","Cela vaut licenciement sans cause réelle et sérieuse","Il paie une amende à l'Urssaf"],correct:2,expl:"Depuis 2017, la promesse unilatérale vaut contrat. La révocation est un licenciement abusif.",fiche:4,cat:"Embauche"},
+  {q:"Un algorithme qui géolocalise un livreur, impose des itinéraires et sanctionne les refus de courses crée-t-il un contrat de travail ?",opts:["Non, il reste indépendant","Oui, cela caractérise un lien de subordination","Seulement s'il y a exclusivité"],correct:1,expl:"La jurisprudence (Take eat easy, Uber) retient que le pouvoir de direction, contrôle et sanction caractérise le lien de subordination, même pour les plateformes.",fiche:5,cat:"Contrat"},
+  {q:"Quelle est la durée maximale de l'essai pour un ouvrier ?",opts:["1 mois","2 mois","3 mois","4 mois"],correct:1,expl:"2 mois pour ouvriers/employés, 3 mois pour techniciens/agents de maîtrise, 4 mois pour les cadres.",fiche:5,cat:"Contrat"},
+  {q:"Qu'est-ce qui rend une clause de non-concurrence nulle ?",opts:["L'absence de contrepartie financière","Une durée de plus de 2 ans","Le fait de l'appliquer après une démission"],correct:0,expl:"Sans contrepartie financière (ou si elle est dérisoire), la clause de non-concurrence est nulle.",fiche:5,cat:"Contrat"},
+  {q:"Peut-on insérer une clause 'couperet' de retraite automatique dans le contrat ?",opts:["Oui, avec l'accord du salarié","Oui, à partir de 70 ans","Non, elle est totalement interdite"],correct:2,expl:"Les clauses couperet prévoyant la rupture de plein droit en raison de l'âge sont nulles.",fiche:5,cat:"Contrat"},
+  {q:"Peut-on embaucher en CDD pour remplacer un gréviste ?",opts:["Oui","Non, c'est interdit","Uniquement en intérim"],correct:1,expl:"Il est formellement interdit de remplacer un salarié gréviste par un CDD ou de l'intérim.",fiche:6,cat:"CDD"},
+  {q:"Quel est le délai de carence entre deux CDD ?",opts:["15 jours","1/3 de la durée du contrat","1 mois"],correct:1,expl:"1/3 de la durée du contrat (renouvellement inclus). 1/2 si CDD < 15 jours.",fiche:6,cat:"CDD"},
+  {q:"Quel est le délai de prescription d'une faute disciplinaire ?",opts:["1 mois","2 mois","6 mois","1 an"],correct:1,expl:"L'employeur a 2 mois pour sanctionner une faute à compter de sa découverte.",fiche:7,cat:"Discipline"},
+  {q:"Taux de majoration des 8 premières heures supplémentaires (sans accord) ?",opts:["10 %","25 %","50 %"],correct:1,expl:"25 % pour les 8 premières (de la 36e à la 43e heure), puis 50 % au-delà.",fiche:8,cat:"Temps de travail"},
+  {q:"Durée du congé paternité ?",opts:["11 jours","14 jours","25 jours","30 jours"],correct:2,expl:"25 jours calendaires (32 pour naissances multiples) à prendre dans les 6 mois.",fiche:9,cat:"Congés"},
+  {q:"Abondement CPF si l'employeur ne fait ni entretien ni formation sur 6 ans ?",opts:["1 000 €","3 000 €","5 000 €"],correct:1,expl:"Sanction de 3 000 € sur le CPF du salarié.",fiche:10,cat:"Formation"},
+  {q:"La faute lourde prive-t-elle des indemnités de licenciement ?",opts:["Oui, comme la faute grave","Non, on garde le préavis","Non"],correct:0,expl:"La faute lourde (intention de nuire) prive du préavis et des indemnités.",fiche:15,cat:"Licenciement"},
+  {q:"Ancienneté minimum pour l'indemnité légale de licenciement ?",opts:["6 mois","8 mois","1 an"],correct:1,expl:"8 mois d'ancienneté ininterrompue.",fiche:17,cat:"Rupture"},
+  {q:"Délai de rétractation de la rupture conventionnelle ?",opts:["7 jours","15 jours ouvrables","15 jours calendaires"],correct:2,expl:"15 jours calendaires pour les parties, puis 15 jours ouvrables pour l'homologation DREETS.",fiche:16,cat:"Rupture"},
+  {q:"Seuil obligatoire pour le CSE ?",opts:["11 salariés","50 salariés","300 salariés"],correct:0,expl:"CSE obligatoire dès 11 salariés (attributions étendues dès 50).",fiche:20,cat:"Instances"},
+  {q:"Durée du mandat des élus CSE ?",opts:["2 ans","4 ans","5 ans"],correct:1,expl:"4 ans, renouvelable.",fiche:20,cat:"Instances"},
+  {q:"Quelle faute justifie le licenciement d'un gréviste ?",opts:["Faute simple","Faute grave","Faute lourde"],correct:2,expl:"Seule la faute lourde (commise avec intention de nuire) permet de licencier un gréviste.",fiche:22,cat:"Grève"},
+  {q:"Durée minimale de travail pour ouvrir les droits au chômage (ARE) ?",opts:["4 mois","6 mois","1 an"],correct:1,expl:"6 mois dans les 24 derniers mois (36 mois pour les + de 53 ans).",fiche:25,cat:"Chômage"}
+];
 
 // =============================================
-// CHATBOT IA
+// DATA — RECAP
 // =============================================
-let chatHistory = [];
-
-async function sendChat() {
-  if (!isPremium()) { openPremium(() => sendChat()); return; }
-  
-  const input = document.getElementById('chat-input');
-  const btn = document.getElementById('chat-send');
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  const suggs = document.getElementById('chat-suggestions');
-  if(suggs) suggs.style.display = 'none';
-
-  input.value = '';
-  btn.disabled = true;
-  
-  const msgsContainer = document.getElementById('chat-messages');
-  msgsContainer.innerHTML += `<div class="chat-msg user"><div class="chat-bubble">${msg}</div></div>`;
-  chatHistory.push({ role: 'user', content: msg });
-
-  const typingId = 'typing-' + Date.now();
-  msgsContainer.innerHTML += `<div class="chat-msg ai" id="${typingId}"><div class="chat-bubble typing">⏳ Le juriste analyse...</div></div>`;
-  msgsContainer.scrollTop = msgsContainer.scrollHeight;
-
-  try {
-    // VRAIE REQUÊTE IA VERS TON CLOUDFLARE
-    const res = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: chatHistory })
-    });
-    const data = await res.json();
-    
-    document.getElementById(typingId).remove();
-    
-    if (!res.ok || data.error) {
-      const errMsg = JSON.stringify(data.error || data);
-      msgsContainer.innerHTML += `<div class="chat-msg ai"><div class="chat-bubble">❌ Erreur : ${errMsg}</div></div>`;
-      btn.disabled = false; input.focus(); return;
-    }
-    
-    const reply = data.content?.[0]?.text || "Désolé, je n'ai pas pu formuler de réponse.";
-    msgsContainer.innerHTML += `<div class="chat-msg ai"><div class="chat-bubble">${marked.parse(reply)}</div></div>`;
-    chatHistory.push({ role: 'assistant', content: reply });
-    
-  } catch(e) {
-    document.getElementById(typingId).remove();
-    msgsContainer.innerHTML += `<div class="chat-msg ai"><div class="chat-bubble">❌ Erreur de connexion au serveur IA.</div></div>`;
-  }
-  
-  msgsContainer.scrollTop = msgsContainer.scrollHeight;
-  btn.disabled = false;
-  input.focus();
-}
-
-function sendSugg(btn) {
-  document.getElementById('chat-input').value = btn.textContent;
-  sendChat();
-}
-
-function clearChat() {
-  chatHistory = [];
-  const c = document.getElementById('chat-messages');
-  c.innerHTML = `<div class="chat-msg ai"><div class="chat-bubble">⚖️ Bonjour ! Je suis votre assistant juriste spécialisé en droit du travail français.<br><br>Posez-moi vos questions.</div></div>`;
-  const suggs = document.getElementById('chat-suggestions');
-  if(suggs) suggs.style.display = 'flex';
-}
-
-// =============================================
-// BLOG — Vrai flux Substack (RSS2JSON)
-// =============================================
-const SUBSTACK_URL = 'https://topsirh.substack.com';
-const RSS_URL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(SUBSTACK_URL+'/feed')}&api_key=public&count=20`;
-let blogPosts = [];
-let blogFilter = 'Tous';
-let blogLoaded = false;
-
-async function loadBlog() {
-  if (blogLoaded) { renderBlog(); return; }
-  try {
-    const res = await fetch(RSS_URL);
-    const data = await res.json();
-    if (data.status === 'ok' && data.items) {
-      blogPosts = data.items.map(item => ({
-        title: item.title,
-        excerpt: stripHtml(item.description || item.content || '').slice(0, 160) + '...',
-        date: new Date(item.pubDate).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}),
-        link: item.link,
-        tag: detectTag(item.title + ' ' + (item.description || ''))
-      }));
-      blogLoaded = true;
-      renderBlogFilters();
-      renderBlog();
-    } else {
-      showBlogError();
-    }
-  } catch(e) {
-    showBlogError();
-  }
-}
-
-function stripHtml(html) {
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
-}
-
-function detectTag(text) {
-  const t = text.toLowerCase();
-  if (t.includes('sirh') || t.includes('rh')) return 'RH / SIRH';
-  if (t.includes('contrat') || t.includes('licenciem') || t.includes('droit')) return 'Droit du travail';
-  return 'Actualités';
-}
-
-function renderBlogFilters() {
-  const tags = ['Tous', ...new Set(blogPosts.map(p => p.tag))];
-  document.getElementById('blog-filter').innerHTML = tags.map(t =>
-    `<button class="blog-filter-btn${t==='Tous'?' active':''}" onclick="setBlogFilter('${t}')">${t}</button>`
-  ).join('');
-}
-
-function setBlogFilter(tag) {
-  blogFilter = tag;
-  document.querySelectorAll('.blog-filter-btn').forEach(b => b.classList.toggle('active', b.textContent === tag));
-  renderBlog();
-}
-
-function renderBlog() {
-  const filtered = blogFilter === 'Tous' ? blogPosts : blogPosts.filter(p => p.tag === blogFilter);
-  if (!filtered.length) {
-    document.getElementById('blog-grid').innerHTML = `<div class="blog-error"><p>Aucun article.</p></div>`;
-    return;
-  }
-  document.getElementById('blog-grid').innerHTML = filtered.map(p => `
-    <a class="blog-card" href="${p.link}" target="_blank" rel="noopener">
-      <div class="blog-card-tag">${p.tag}</div>
-      <div class="blog-card-title">${p.title}</div>
-      <div class="blog-card-excerpt">${p.excerpt}</div>
-      <div class="blog-card-footer">
-        <span class="blog-card-date">${p.date}</span>
-        <span class="blog-card-read">Lire →</span>
-      </div>
-    </a>`).join('');
-}
-
-function showBlogError() {
-  document.getElementById('blog-grid').innerHTML = `
-    <div class="blog-error">
-      <p style="font-size:2rem;margin-bottom:.5rem">📡</p>
-      <p>Impossible de charger les articles.<br><a href="${SUBSTACK_URL}" target="_blank">Voir sur Substack</a></p>
-    </div>`;
-}
-
-// =============================================
-// MODALES & ABONNEMENT (Vrai Brevo)
-// =============================================
-function openModal() { document.getElementById('modal-overlay').classList.add('open'); }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-
-async function submitSubscribe(e) {
-  e.preventDefault();
-  const email = document.getElementById('subscribe-email').value.trim();
-  const btn = document.getElementById('subscribe-submit');
-  const errEl = document.getElementById('subscribe-error');
-  const okEl = document.getElementById('subscribe-success');
-  
-  if (!email) return;
-  
-  btn.textContent = '⏳ Inscription en cours...';
-  btn.disabled = true;
-  errEl.style.display = 'none';
-  okEl.style.display = 'none';
-  
-  try {
-    const formData = new FormData();
-    formData.append('EMAIL', email);
-    formData.append('email_address_check', '');
-    formData.append('locale', 'fr');
-    
-    // VRAIE REQUÊTE VERS TON BREVO
-    await fetch('https://2baff920.sibforms.com/serve/MUIFAD2Gyh81Kn1j-gAmFsCb9abwzHZmtBrXd7UglIum_S2ipSfL6WIcYfjJOEppWUB7nsd8lH5vNJPh_1pevmpRfWQ4kCSq8c5kJv4WU28NQfx4oeOEWY5qEfeNbDHLVCYoo4nJaos8emIUQlhQkScivj_f2_ARpUW_Pp_3t2qWT1x0t0ikn9xE2qeWj1gy9oqV-qaHFcBhTjNQLA==', {
-      method: 'POST',
-      body: formData,
-      mode: 'no-cors'
-    });
-    
-    okEl.style.display = 'block';
-    document.getElementById('subscribe-form').style.display = 'none';
-    showToast('🎉 Inscription confirmée !', 'success');
-    setTimeout(() => closeModal(), 3000);
-  } catch(err) {
-    errEl.style.display = 'block';
-    btn.textContent = '📧 Je m\'abonne gratuitement';
-    btn.disabled = false;
-  }
-}
-
-// =============================================
-// RECAP (MÉMO ACCORDÉON)
-// =============================================
-function renderRecap() {
-  const container = document.getElementById('recap-list');
-  if(container.innerHTML !== '') return; 
-
-  RECAP.forEach((section, idx) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'recap-section';
-    
-    let rowsHtml = '';
-    section.items.forEach(item => {
-      rowsHtml += `<div class="recap-row"><div class="recap-key">${item.k}</div><div class="recap-val">${item.v}</div></div>`;
-    });
-
-    wrap.innerHTML = `
-      <div class="recap-head" onclick="toggleRecap(${idx})">
-        <div class="recap-head-title">${section.title}</div>
-        <div class="recap-head-right">
-          <div class="recap-count">${section.items.length}</div>
-          <div class="recap-chevron" id="chevron-${idx}">▼</div>
-        </div>
-      </div>
-      <div class="recap-body" id="recap-body-${idx}">
-        <div class="recap-body-inner">${rowsHtml}</div>
-      </div>
-    `;
-    container.appendChild(wrap);
-  });
-}
-
-function toggleRecap(idx) {
-  const body = document.getElementById(`recap-body-${idx}`);
-  const chevron = document.getElementById(`chevron-${idx}`);
-  if (body.classList.contains('open')) {
-    body.classList.remove('open');
-    chevron.style.transform = 'rotate(0deg)';
-  } else {
-    body.classList.add('open');
-    chevron.style.transform = 'rotate(180deg)';
-  }
-}
-
-// =============================================
-// FLASHCARDS (Répétition Espacée)
-// =============================================
-let fcCurrentList = [];
-let fcCurrentIdx = 0;
-
-function initFlashcards() {
-  fcCurrentList = [...FLASHCARDS].sort(() => Math.random() - 0.5);
-  fcCurrentIdx = 0;
-  updateFcStats();
-  renderFlashcard();
-}
-
-function updateFcStats() {
-  let newC = 0, learningC = 0, knownC = 0;
-  FLASHCARDS.forEach((_, i) => {
-    const lvl = state.flashcards[i] || 0;
-    if (lvl === 0) newC++;
-    else if (lvl < 3) learningC++;
-    else knownC++;
-  });
-  document.getElementById('sr-new-count').textContent = `🆕 ${newC} nouvelles`;
-  document.getElementById('sr-learning-count').textContent = `📖 ${learningC} en cours`;
-  document.getElementById('sr-known-count').textContent = `✅ ${knownC} maîtrisées`;
-}
-
-function renderFlashcard() {
-  if (fcCurrentIdx >= fcCurrentList.length) fcCurrentIdx = 0;
-  const card = fcCurrentList[fcCurrentIdx];
-  document.getElementById('fc-counter').textContent = `${fcCurrentIdx + 1} / ${fcCurrentList.length}`;
-  document.getElementById('fc-tag').textContent = card.tag;
-  document.getElementById('fc-question').textContent = card.q;
-  document.getElementById('fc-answer').textContent = card.a;
-  
-  document.getElementById('card-scene').classList.remove('flipped');
-  document.getElementById('sr-feedback').classList.remove('show');
-}
-
-function flipCard() {
-  document.getElementById('card-scene').classList.add('flipped');
-  document.getElementById('sr-feedback').classList.add('show');
-}
-
-function nextCard() { fcCurrentIdx++; renderFlashcard(); }
-function prevCard() { fcCurrentIdx = fcCurrentIdx > 0 ? fcCurrentIdx - 1 : fcCurrentList.length - 1; renderFlashcard(); }
-
-function srRate(rating) {
-  const card = fcCurrentList[fcCurrentIdx];
-  const originalIdx = FLASHCARDS.indexOf(card);
-  let lvl = state.flashcards[originalIdx] || 0;
-  
-  if (rating === 'no') lvl = 1;
-  else if (rating === 'hard') lvl = Math.max(1, lvl);
-  else if (rating === 'ok') lvl = Math.min(3, lvl + 1);
-  
-  state.flashcards[originalIdx] = lvl;
-  localStorage.setItem('flashcards', JSON.stringify(state.flashcards));
-  
-  updateFcStats();
-  nextCard();
-}
-
-// =============================================
-// QUIZ
-// =============================================
-let currentQuiz = [];
-let quizScore = 0;
-let quizIndex = 0;
-
-function initQuiz() {
-  currentQuiz = [...QUIZ].sort(() => Math.random() - 0.5).slice(0, 10); 
-  quizScore = 0;
-  quizIndex = 0;
-  renderQuizQuestion();
-}
-
-function renderQuizQuestion() {
-  const container = document.getElementById('quiz-area');
-  const actions = document.getElementById('quiz-actions');
-  const bar = document.getElementById('quiz-bar');
-  
-  if (quizIndex >= currentQuiz.length) { showQuizResults(); return; }
-
-  const q = currentQuiz[quizIndex];
-  bar.style.width = ((quizIndex / currentQuiz.length) * 100) + '%';
-  
-  let html = `<div class="question-card"><div class="q-meta">Question ${quizIndex + 1} / ${currentQuiz.length} • ${q.cat}</div><div class="q-text">${q.q}</div><div class="options-list">`;
-  q.opts.forEach((opt, idx) => { html += `<button class="opt-btn" onclick="answerQuiz(${idx})">${opt}</button>`; });
-  html += `</div><div class="explanation" id="quiz-expl">${q.expl}</div></div>`;
-  
-  container.innerHTML = html;
-  actions.innerHTML = '';
-}
-
-function answerQuiz(idx) {
-  const q = currentQuiz[quizIndex];
-  const btns = document.querySelectorAll('.opt-btn');
-  const expl = document.getElementById('quiz-expl');
-  const actions = document.getElementById('quiz-actions');
-  
-  btns.forEach(b => b.disabled = true);
-  if (idx === q.correct) { btns[idx].classList.add('correct'); quizScore++; } 
-  else { btns[idx].classList.add('wrong'); btns[q.correct].classList.add('correct'); }
-  
-  expl.classList.add('show');
-  const nextBtn = document.createElement('button');
-  nextBtn.className = 'btn-primary';
-  nextBtn.textContent = quizIndex === currentQuiz.length - 1 ? 'Voir les résultats' : 'Question suivante →';
-  nextBtn.onclick = () => { quizIndex++; renderQuizQuestion(); };
-  actions.appendChild(nextBtn);
-}
-
-function showQuizResults() {
-  const percentage = Math.round((quizScore / currentQuiz.length) * 100);
-  if (!state.quizHighscore || percentage > state.quizHighscore) {
-    state.quizHighscore = percentage;
-    localStorage.setItem('quizHighscore', percentage);
-    updateHomeStats();
-  }
-  document.getElementById('quiz-bar').style.width = '100%';
-  document.getElementById('quiz-area').innerHTML = `
-    <div class="results-wrap"><div class="results-card">
-      <div class="results-score">${percentage}%</div><div class="results-label">Score final</div>
-      <div class="results-stats">
-        <div class="rs-pill rs-correct"><div class="rs-num">${quizScore}</div><div class="rs-lbl">Correctes</div></div>
-        <div class="rs-pill rs-wrong"><div class="rs-num">${currentQuiz.length - quizScore}</div><div class="rs-lbl">Erreurs</div></div>
-      </div>
-    </div></div>`;
-  document.getElementById('quiz-actions').innerHTML = `<button class="btn-primary" onclick="initQuiz()">Refaire un quiz</button>`;
-}
-
-function restartQuiz() { if(confirm("Recommencer le quiz à zéro ?")) initQuiz(); }
+const RECAP = [
+  {title:"⏰ Délais CPH",items:[{k:"Rupture du contrat",v:"12 mois"},{k:"Exécution du contrat",v:"2 ans"},{k:"Salaires / heures supp",v:"3 ans"},{k:"Solde de tout compte",v:"6 mois"},{k:"Harcèlement / discri.",v:"5 ans"}]},
+  {title:"📋 Période d'essai (CDI)",items:[{k:"Ouvriers / Employés",v:"2 mois (max 4 renouvelé)"},{k:"Agents de maîtrise / Techniciens",v:"3 mois (max 6 renouvelé)"},{k:"Cadres",v:"4 mois (max 8 renouvelé)"},{k:"Délai de prévenance employeur",v:"De 24h à 1 mois selon présence"}]},
+  {title:"🔐 Clauses du contrat",items:[{k:"Non-concurrence",v:"Limitée temps/espace + contrepartie financière"},{k:"Dédit-formation",v:"Remboursement si départ prématuré (valide)"},{k:"Mobilité",v:"Zone précise, mise en œuvre de bonne foi"},{k:"Couperet (âge retraite)",v:"Totalement NULLE"}]},
+  {title:"📝 CDD",items:[{k:"Durée max",v:"18 mois (renouvellements inclus)"},{k:"Délai de carence",v:"1/3 de la durée (1/2 si < 15 j)"},{k:"Indemnité de précarité",v:"10 % du salaire brut"}]},
+  {title:"⚖️ Licenciement",items:[{k:"Ancienneté min. indemnité",v:"8 mois"},{k:"Calcul jusqu'à 10 ans",v:"1/4 de mois / année"},{k:"Calcul au-delà 10 ans",v:"1/3 de mois / année"},{k:"Délai convocation → entretien",v:"5 jours ouvrables min."}]},
+  {title:"🤝 Rupture conventionnelle",items:[{k:"Rétractation",v:"15 jours calendaires"},{k:"Homologation DREETS",v:"15 jours ouvrables"}]},
+  {title:"⏱️ Temps de travail",items:[{k:"Majoration HS",v:"25 % puis 50 % (accord: min 10 %)"},{k:"Maximum hebdomadaire",v:"48 h (44 h sur 12 sem.)"},{k:"Repos quotidien",v:"11 h consécutives"}]},
+  {title:"👥 Instances & Représentation",items:[{k:"CSE obligation",v:"≥ 11 salariés"},{k:"Règlement Intérieur",v:"≥ 50 salariés"},{k:"Protection Élu CSE",v:"Pendant mandat + 6 mois après"},{k:"Protection DS",v:"Pendant mandat + 12 mois après"}]},
+  {title:"🏥 Chômage & Sécu",items:[{k:"Carence Maladie",v:"3 jours (0 pour AT/MP)"},{k:"Ouverture droits ARE",v:"6 mois travaillés sur 24 mois"},{k:"Portabilité Mutuelle",v:"Max 12 mois après la rupture"}]}
+];
