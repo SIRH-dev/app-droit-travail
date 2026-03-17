@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LexStudy — Droit du Travail 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=DM+Sans:wght@400;700&family=DM+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -26,51 +26,42 @@
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal-box">
-    <div style="font-size:26px; font-weight:900; color:var(--accent); margin-bottom:10px;">Bienvenue sur LexStudy</div>
-    <p style="margin-bottom:25px;">Inscrivez-vous pour déverrouiller l'accès gratuit aux 28 fiches et au Juriste IA 2026.</p>
-    
-    <div id="subscribe-success" style="display:none; color:var(--accent); font-weight:bold; margin-bottom:15px;">🎉 Accès accordé !</div>
-    
+    <h2>Bienvenue sur LexStudy</h2>
+    <p>Inscrivez-vous pour déverrouiller l'accès aux 28 fiches et au Juriste IA 2026.</p>
+    <div id="subscribe-success" style="display:none; color:var(--accent); margin-bottom:15px; font-weight:bold;">🎉 Accès accordé !</div>
     <form id="subscribe-form" onsubmit="submitSubscribe(event)">
-      <input type="email" id="subscribe-email" placeholder="votre@email.com" required 
-             style="width:100%; padding:14px; border-radius:12px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); color:#fff; margin-bottom:15px; outline:none;">
+      <input type="email" id="subscribe-email" placeholder="votre@email.com" required>
       <button type="submit" id="subscribe-submit">Accéder au site →</button>
     </form>
   </div>
 </div>
 
 <div id="screen-home" class="screen active">
-  <div style="text-align:center; padding:50px 20px;">
+  <div class="home-hero">
     <h1>Maîtrisez le Droit du Travail</h1>
-    <button class="btn-primary" style="max-width:200px;" onclick="showScreen('fiches')">Commencer à réviser</button>
+    <button class="btn-primary" onclick="showScreen('fiches')">Commencer à réviser</button>
   </div>
 </div>
 
-<div id="screen-fiches" class="screen"><div id="fiches-list"></div></div>
+<div id="screen-fiches" class="screen">
+  <div id="fiches-list"></div>
+</div>
 
 <div id="screen-reader" class="screen">
   <div class="reader-container">
-    <button class="btn-primary" onclick="showScreen('fiches')" style="width:auto; margin-bottom:20px;">← Retour</button>
+    <button class="btn-back" onclick="showScreen('fiches')">← Retour</button>
     <div class="fiche-content" id="fiche-content-area"></div>
   </div>
 </div>
 
 <div id="screen-chat" class="screen">
-  <div style="max-width:600px; margin: 0 auto; padding:20px;">
-    <div id="chat-messages" style="height:400px; overflow-y:auto; margin-bottom:20px;"></div>
-    <input type="text" id="chat-input" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter') sendChat()"
-           style="width:100%; padding:15px; border-radius:15px; background:var(--glass); border:1px solid var(--glass-border); color:#fff;">
-  </div>
-</div>
-
-<div class="premium-overlay" id="premium-overlay" style="display:none;">
-    <div class="modal-box">
-        <h3>Espace Membre</h3>
-        <p>Cette section nécessite un code d'accès.</p>
-        <input type="text" id="premium-code-input" placeholder="Code Ko-fi">
-        <button onclick="submitPremiumCode()">Activer</button>
-        <button onclick="closePremium()">Annuler</button>
+  <div class="chat-container">
+    <div id="chat-messages" class="chat-messages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Posez une question..." onkeydown="if(event.key==='Enter') sendChat()">
+      <button class="chat-send-btn" onclick="sendChat()">➤</button>
     </div>
+  </div>
 </div>
 
 <script src="data.js"></script>
