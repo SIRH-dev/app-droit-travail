@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="description" content="Le Droit du Travail Facile — Fiches de cours, quiz, flashcards et assistant juridique IA pour maîtriser le droit du travail français.">
 <title>Le Droit du Travail Facile</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -23,51 +23,11 @@
       <button class="top-nav-tab" onclick="showScreen('chat')">⚖️ Juriste</button>
     </nav>
     <div class="header-actions">
-      <button class="subscribe-btn" onclick="openModal()">📧 S'abonner</button>
-      <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" aria-label="Changer le thème" title="Changer le thème">🌙</button>
+      <button class="subscribe-btn" id="header-sub-btn">📧 S'abonner</button>
       <div class="progress-chip" id="global-progress">0/28</div>
     </div>
   </div>
 </header>
-
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
-  <div class="modal-box" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-brevo">
-      <div style="font-size:22px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--text);margin-bottom:.5rem">
-        Restez informé avec Le Droit du Travail Facile
-      </div>
-      <div style="font-size:.88rem;color:var(--text-muted);margin-bottom:1.25rem;line-height:1.6">
-        Recevez les mises à jour du Droit du Travail directement dans votre boîte mail.
-      </div>
-      <div id="subscribe-success" style="display:none;background:#e7faf0;border:1px solid #13ce66;border-radius:10px;padding:1rem;text-align:center;color:#085229;font-weight:600;margin-bottom:1rem">
-        🎉 Inscription confirmée ! Vérifiez votre boîte mail.
-      </div>
-      <div id="subscribe-error" style="display:none;background:#ffeded;border:1px solid #ff4949;border-radius:10px;padding:1rem;text-align:center;color:#661d1d;font-size:.85rem;margin-bottom:1rem">
-        ❌ Une erreur est survenue. Réessayez.
-      </div>
-      <form id="subscribe-form" onsubmit="submitSubscribe(event)">
-        <label for="subscribe-email" style="font-size:.83rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.4rem">Votre adresse email *</label>
-        <input
-          type="email"
-          id="subscribe-email"
-          placeholder="exemple@email.com"
-          required
-          style="width:100%;padding:.75rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--surface2);color:var(--text);font-size:.9rem;font-family:'DM Sans',sans-serif;margin-bottom:.9rem;outline:none;transition:border .2s"
-          onfocus="this.style.borderColor='var(--accent)'"
-          onblur="this.style.borderColor='var(--border)'"
-        />
-        <button
-          type="submit"
-          id="subscribe-submit"
-          style="width:100%;padding:.8rem;background:var(--accent);border:none;border-radius:10px;color:#0e0f13;font-size:.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .2s"
-        >
-          📧 Je m'abonne gratuitement
-        </button>
-      </form>
-    </div>
-  </div>
-</div>
 
 <nav class="bottom-nav">
   <button class="bottom-nav-item active" onclick="showScreen('home')"><span class="nav-icon">🏠</span>Accueil</button>
@@ -81,28 +41,46 @@
   <div class="home-hero">
     <h1>Maîtrisez le <em>Droit du Travail</em></h1>
     <p>Votre assistant en droit du travail — fiches, quiz et IA pour décrocher vos examens avec confiance.</p>
+    
+    <div class="lead-magnet-block" id="lead-magnet">
+      <div class="lm-text">
+        <h3>Accès 100% Gratuit</h3>
+        <p>Entrez votre e-mail pour débloquer toutes les fiches, les quiz et l'assistant IA.</p>
+      </div>
+      <div class="lm-form-wrap">
+        <form id="subscribe-form" class="lm-form" onsubmit="submitSubscribe(event)">
+          <input type="email" id="subscribe-email" placeholder="Entrez votre e-mail ici" required />
+          <button type="submit" id="subscribe-submit">Débloquer le site</button>
+        </form>
+        <div id="subscribe-success" style="display:none; color: white; font-weight: bold; margin-top: 0.5rem;">🎉 Compte activé ! Le menu est débloqué.</div>
+        <div id="subscribe-error" style="display:none; color: #ffcccc; margin-top: 0.5rem; font-size: 0.8rem;">❌ Erreur. Réessayez.</div>
+        <div class="lm-rgpd">En validant, vous acceptez de recevoir nos conseils par e-mail. Désinscription possible à tout moment.</div>
+      </div>
+    </div>
   </div>
+  
   <div class="stats-row">
     <div class="stat-card"><div class="s-num" id="stat-fiches">0</div><div class="s-lbl">Fiches lues</div></div>
     <div class="stat-card"><div class="s-num" id="stat-known">0</div><div class="s-lbl">Cartes maîtrisées</div></div>
     <div class="stat-card"><div class="s-num" id="stat-quiz">—</div><div class="s-lbl">Meilleur score</div></div>
     <div class="stat-card"><div class="s-num">28</div><div class="s-lbl">Fiches totales</div></div>
   </div>
+  
   <div class="mode-grid">
     <div class="mode-card" style="--card-accent:#e8c96e" onclick="showScreen('fiches')">
-      <span class="badge">28</span><span class="icon">📚</span>
+      <span class="icon">📚</span>
       <h3>Cours</h3><p>Toutes les fiches structurées</p>
     </div>
     <div class="mode-card" style="--card-accent:#7b9cff" onclick="showScreen('flashcards')">
-      <span class="badge">80+</span><span class="icon">🃏</span>
+      <span class="icon">🃏</span>
       <h3>Flashcards</h3><p>Révision espacée type Anki</p>
     </div>
     <div class="mode-card" style="--card-accent:#ff7b7b" onclick="showScreen('quiz')">
-      <span class="badge">60+</span><span class="icon">🎯</span>
+      <span class="icon">🎯</span>
       <h3>Quiz</h3><p>QCM avec corrections</p>
     </div>
     <div class="mode-card" style="--card-accent:#7bffb8" onclick="showScreen('recap')">
-      <span class="badge">12</span><span class="icon">📋</span>
+      <span class="icon">📋</span>
       <h3>Mémo</h3><p>Délais et chiffres clés</p>
     </div>
   </div>

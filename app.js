@@ -31,6 +31,12 @@ function openPremium(action) {
 function closePremium() {
   document.getElementById('premium-overlay').classList.remove('open');
   pendingPremiumAction = null;
+  
+  // FIX BUG : Si l'utilisateur ferme la modale sans code valide
+  // et qu'il se trouve sur la page 'chat', on le renvoie à l'accueil
+  if (!isPremium() && document.getElementById('screen-chat')?.classList.contains('active')) {
+    showScreen('home');
+  }
 }
 
 async function submitPremiumCode() {
@@ -119,9 +125,26 @@ function getSRCounts(){
 }
 
 // =============================================
-// NAVIGATION
+// NAVIGATION & VERROUILLAGE (PÉAGE)
 // =============================================
 function showScreen(name){
+  // Vérifie si l'utilisateur s'est inscrit
+  const isRegistered = localStorage.getItem('ls_registered') === 'true';
+
+  // LE PÉAGE : Si pas inscrit ET essaie d'aller ailleurs que l'accueil
+  if (!isRegistered && name !== 'home') {
+    toast('🔒 Entrez votre e-mail sur l\'accueil pour débloquer le contenu.', 'warn');
+    
+    // On le force à rester sur l'accueil
+    if (!document.getElementById('screen-home').classList.contains('active')) {
+      showScreen('home');
+    }
+    
+    // Fait défiler la page doucement jusqu'au formulaire rouge
+    document.getElementById('lead-magnet')?.scrollIntoView({behavior: 'smooth'});
+    return; // On arrête la fonction ici
+  }
+
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.top-nav-tab,.bottom-nav-item').forEach(t=>t.classList.remove('active'));
   document.getElementById('screen-'+name)?.classList.add('active');
@@ -555,24 +578,6 @@ function toggleRecap(i){
 }
 
 // =============================================
-// THEME
-// =============================================
-function toggleTheme(){
-  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  document.documentElement.setAttribute('data-theme',isDark?'light':'dark');
-  const btn = document.getElementById('theme-btn');
-  if(btn) btn.textContent=isDark?'🌙':'☀️';
-  localStorage.setItem('ls_theme',isDark?'light':'dark');
-}
-// Load saved theme
-const savedTheme=localStorage.getItem('ls_theme');
-if(savedTheme){
-  document.documentElement.setAttribute('data-theme',savedTheme);
-  const btn = document.getElementById('theme-btn');
-  if(btn) btn.textContent=savedTheme==='light'?'🌙':'☀️';
-}
-
-// =============================================
 // TOAST
 // =============================================
 function toast(msg,type=''){
@@ -679,7 +684,7 @@ function showBlogError() {
 }
 
 // =============================================
-// SUBSCRIBE — Brevo fetch
+// SUBSCRIBE — Formulaire d'inscription (DÉBLOCAGE)
 // =============================================
 async function submitSubscribe(e) {
   e.preventDefault();
@@ -688,43 +693,78 @@ async function submitSubscribe(e) {
   const errEl = document.getElementById('subscribe-error');
   const okEl = document.getElementById('subscribe-success');
   if (!email) return;
-  btn.textContent = '⏳ Inscription en cours...';
+
+  btn.textContent = '⏳ Déblocage en cours...';
   btn.disabled = true;
   errEl.style.display = 'none';
   okEl.style.display = 'none';
+
   try {
     const formData = new FormData();
     formData.append('EMAIL', email);
     formData.append('email_address_check', '');
     formData.append('locale', 'fr');
-    const res = await fetch('https://2baff920.sibforms.com/serve/MUIFAD2Gyh81Kn1j-gAmFsCb9abwzHZmtBrXd7UglIum_S2ipSfL6WIcYfjJOEppWUB7nsd8lH5vNJPh_1pevmpRfWQ4kCSq8c5kJv4WU28NQfx4oeOEWY5qEfeNbDHLVCYoo4nJaos8emIUQlhQkScivj_f2_ARpUW_Pp_3t2qWT1x0t0ikn9xE2qeWj1gy9oqV-qaHFcBhTjNQLA==', {
+
+    await fetch('https://2baff920.sibforms.com/serve/MUIFAD2Gyh81Kn1j-gAmFsCb9abwzHZmtBrXd7UglIum_S2ipSfL6WIcYfjJOEppWUB7nsd8lH5vNJPh_1pevmpRfWQ4kCSq8c5kJv4WU28NQfx4oeOEWY5qEfeNbDHLVCYoo4nJaos8emIUQlhQkScivj_f2_ARpUW_Pp_3t2qWT1x0t0ikn9xE2qeWj1gy9oqV-qaHFcBhTjNQLA==', {
       method: 'POST',
       body: formData,
       mode: 'no-cors'
     });
+
+    // Déblocage du site
+    localStorage.setItem('ls_registered', 'true');
     okEl.style.display = 'block';
     document.getElementById('subscribe-form').style.display = 'none';
-    toast('🎉 Inscription confirmée !', 'success');
-    setTimeout(() => closeModal(), 3000);
+    const lmTextP = document.querySelector('.lm-text p');
+    if (lmTextP) lmTextP.textContent = "Merci ! Vous avez maintenant accès à tout le contenu.";
+
+    const headerSubBtn = document.getElementById('header-sub-btn');
+    if (headerSubBtn) {
+      headerSubBtn.textContent = '✓ Connecté';
+      headerSubBtn.style.background = 'var(--correct)';
+      headerSubBtn.style.pointerEvents = 'none';
+    }
+
+    toast('🎉 Contenu débloqué avec succès !', 'success');
   } catch(err) {
     errEl.style.display = 'block';
-    btn.textContent = '📧 Je m\'abonne gratuitement';
+    btn.textContent = 'Débloquer le site';
     btn.disabled = false;
   }
 }
 
 // =============================================
-// MODAL
-// =============================================
-function openModal(){document.getElementById('modal-overlay').classList.add('open');document.body.style.overflow='hidden'}
-function closeModal(){document.getElementById('modal-overlay').classList.remove('open');document.body.style.overflow=''}
-document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal()});
-
-// =============================================
 // INIT
 // =============================================
-// On retarde un peu l'initialisation pour s'assurer que data.js est bien chargé
 window.addEventListener('DOMContentLoaded', () => {
+  // Vérifier si l'utilisateur est déjà inscrit
+  const isRegistered = localStorage.getItem('ls_registered') === 'true';
+  const headerSubBtn = document.getElementById('header-sub-btn');
+
+  if (isRegistered) {
+    // Cacher le bloc rouge d'inscription
+    const lmBlock = document.getElementById('lead-magnet');
+    if (lmBlock) lmBlock.style.display = 'none';
+    
+    // Changer le bouton du menu haut
+    if (headerSubBtn) {
+      headerSubBtn.textContent = '✓ Connecté';
+      headerSubBtn.style.background = 'var(--correct)';
+      headerSubBtn.style.pointerEvents = 'none';
+    }
+  } else {
+    // Si non inscrit, le bouton S'abonner du haut fait scroller vers le formulaire
+    if (headerSubBtn) {
+      headerSubBtn.onclick = function(e) {
+        e.preventDefault();
+        if (!document.getElementById('screen-home').classList.contains('active')) {
+          showScreen('home');
+        }
+        document.getElementById('lead-magnet')?.scrollIntoView({behavior: 'smooth'});
+      };
+    }
+  }
+
   updateHome();
   renderRecap();
 });
@@ -814,7 +854,6 @@ function clearChat() {
 // =============================================
 function initVeille() {
   const sel = document.getElementById('veille-fiche-select');
-  // SÉCURITÉ : si l'élément HTML n'existe pas, on arrête la fonction ici
   if (!sel || typeof FICHES === 'undefined') return; 
   
   if (sel.options.length > 1) return;
