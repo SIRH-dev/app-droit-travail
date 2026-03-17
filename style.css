@@ -92,6 +92,10 @@ body{
 .theme-btn:hover{border-color:var(--accent);background:var(--surface3)}
 .progress-chip{font-size:.72rem;color:var(--text-muted);font-family:'DM Mono',monospace;background:var(--surface2);padding:.25rem .65rem;border-radius:999px;border:1px solid var(--glass-border);white-space:nowrap}
 
+/* ===== SUBSCRIBE BTN ===== */
+.subscribe-btn{background:var(--accent);border:none;color:#0e0f13;padding:.35rem .85rem;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .2s;white-space:nowrap}
+.subscribe-btn:hover{opacity:.85;transform:translateY(-1px)}
+
 /* ===== BOTTOM NAV (mobile) ===== */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,10,15,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--glass-border);display:flex;padding:0;padding-bottom:env(safe-area-inset-bottom)}
 [data-theme="light"] .bottom-nav{background:rgba(245,245,247,0.95);}
@@ -111,10 +115,6 @@ body{
   .top-nav-tab:hover{background:var(--surface2);color:var(--text)}
   .top-nav-tab.active{background:var(--accent);color:#0e0f13}
 }
-
-/* ===== SUBSCRIBE BTN ===== */
-.subscribe-btn{background:var(--accent);border:none;color:#0e0f13;padding:.35rem .85rem;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .2s;white-space:nowrap}
-.subscribe-btn:hover{opacity:.85;transform:translateY(-1px)}
 
 /* ===== SCREENS ===== */
 .screen{display:none;min-height:calc(100vh - 58px)}
@@ -340,10 +340,6 @@ body{
 .blog-spinner{width:32px;height:32px;border:3px solid var(--glass-border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 .blog-error{text-align:center;padding:2rem;color:var(--text-muted);background:var(--glass);border:1px solid var(--glass-border);border-radius:18px}
 .blog-error a{color:var(--accent)}
-
-/* ===== SUBSCRIBE BTN ===== */
-.subscribe-btn{background:var(--accent);border:none;color:#0e0f13;padding:.35rem .85rem;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .2s;white-space:nowrap}
-.subscribe-btn:hover{opacity:.85;transform:translateY(-1px)}
 
 /* ===== MODAL ===== */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}

@@ -20,9 +20,11 @@ function openPremium(action) {
   // Dessiner le bouton Ko-fi dans la modal
   const container = document.getElementById('kofi-btn-container');
   if (container && container.innerHTML === '') {
-    kofiwidget2.draw();
-    const kofiEl = document.querySelector('.kofi-button-container');
-    if (kofiEl) container.appendChild(kofiEl);
+    if (typeof kofiwidget2 !== 'undefined') {
+      kofiwidget2.draw();
+      const kofiEl = document.querySelector('.kofi-button-container');
+      if (kofiEl) container.appendChild(kofiEl);
+    }
   }
 }
 
@@ -53,7 +55,7 @@ async function submitPremiumCode() {
     if (data.valid) {
       localStorage.setItem(PREMIUM_KEY, JSON.stringify({ expiry: data.expiry }));
       closePremium();
-      toast('Accès Premium activé !');
+      toast('Accès Premium activé !', 'success');
       if (pendingPremiumAction) pendingPremiumAction();
     } else {
       err.textContent = data.reason || 'Code invalide. Vérifiez et réessayez.';
@@ -81,6 +83,9 @@ document.getElementById('premium-code-input')?.addEventListener('keydown', e => 
 // =============================================
 // STATE
 // =============================================
+// Sécurité : on vérifie que FLASHCARDS existe bien depuis data.js
+const safeCards = (typeof FLASHCARDS !== 'undefined') ? [...FLASHCARDS.map((_,i)=>i)] : [];
+
 const S = {
   completedFiches: JSON.parse(localStorage.getItem('ls_fiches')||'[]'),
   srData: JSON.parse(localStorage.getItem('ls_sr')||'{}'),
@@ -94,7 +99,7 @@ const S = {
   quizDone: false,
   quizFilter: 'all',
   fcFilter: 'all',
-  activeCards: [...FLASHCARDS.map((_,i)=>i)]
+  activeCards: safeCards
 };
 
 function save(){
@@ -107,7 +112,9 @@ function save(){
 function getSRStatus(i){return S.srData[i]||'new'}
 function getSRCounts(){
   let n=0,l=0,k=0;
-  FLASHCARDS.forEach((_,i)=>{const s=getSRStatus(i);if(s==='new')n++;else if(s==='learning')l++;else k++;});
+  if(typeof FLASHCARDS !== 'undefined') {
+    FLASHCARDS.forEach((_,i)=>{const s=getSRStatus(i);if(s==='new')n++;else if(s==='learning')l++;else k++;});
+  }
   return{n,l,k};
 }
 
@@ -117,7 +124,7 @@ function getSRCounts(){
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.top-nav-tab,.bottom-nav-item').forEach(t=>t.classList.remove('active'));
-  document.getElementById('screen-'+name).classList.add('active');
+  document.getElementById('screen-'+name)?.classList.add('active');
   const map={home:0,fiches:1,flashcards:2,quiz:3,recap:4,blog:5,chat:6};
   if(map[name]!==undefined){
     document.querySelectorAll('.top-nav-tab')[map[name]]?.classList.add('active');
@@ -143,11 +150,19 @@ function showScreen(name){
 // HOME
 // =============================================
 function updateHome(){
-  document.getElementById('stat-fiches').textContent=S.completedFiches.length;
-  const {k}=getSRCounts();
-  document.getElementById('stat-known').textContent=k;
-  document.getElementById('stat-quiz').textContent=S.bestScore!==null?S.bestScore+'%':'—';
-  document.getElementById('global-progress').textContent=S.completedFiches.length+'/28';
+  const fichesCount = typeof FICHES !== 'undefined' ? FICHES.length : 28;
+  const statFiches = document.getElementById('stat-fiches');
+  if (statFiches) statFiches.textContent = S.completedFiches.length;
+  
+  const statKnown = document.getElementById('stat-known');
+  const {k} = getSRCounts();
+  if (statKnown) statKnown.textContent = k;
+  
+  const statQuiz = document.getElementById('stat-quiz');
+  if (statQuiz) statQuiz.textContent = S.bestScore !== null ? S.bestScore + '%' : '—';
+  
+  const globalProgress = document.getElementById('global-progress');
+  if (globalProgress) globalProgress.textContent = `${S.completedFiches.length}/${fichesCount}`;
 }
 
 // =============================================
@@ -167,6 +182,7 @@ const PARTIES=[
 ];
 
 function renderFichesList(){
+  if(typeof FICHES === 'undefined') return;
   let html='';
   PARTIES.forEach(p=>{
     const fiches=FICHES.filter(f=>f.num>=p.range[0]&&f.num<=p.range[1]);
@@ -181,7 +197,8 @@ function renderFichesList(){
     });
     html+=`</div></div>`;
   });
-  document.getElementById('fiches-list').innerHTML=html;
+  const listEl = document.getElementById('fiches-list');
+  if (listEl) listEl.innerHTML = html;
   updateHome();
 }
 
@@ -193,14 +210,23 @@ function openFiche(idx){
 }
 
 function renderFiche(){
+  if(typeof FICHES === 'undefined') return;
   const f=FICHES[S.currentFiche];
-  document.getElementById('fiche-content-area').innerHTML=f.content;
-  document.getElementById('reader-progress').textContent=`${S.currentFiche+1} / ${FICHES.length}`;
-  document.getElementById('btn-next-fiche').onclick=()=>{
-    if(!S.completedFiches.includes(f.num)){S.completedFiches.push(f.num);save();}
-    if(S.currentFiche<FICHES.length-1){S.currentFiche++;renderFiche();window.scrollTo(0,0);}
-    else{toast('🎉 Toutes les fiches lues !','success');showScreen('fiches');}
-  };
+  const contentArea = document.getElementById('fiche-content-area');
+  if(contentArea) contentArea.innerHTML=f.content;
+  
+  const progress = document.getElementById('reader-progress');
+  if(progress) progress.textContent=`${S.currentFiche+1} / ${FICHES.length}`;
+  
+  const nextBtn = document.getElementById('btn-next-fiche');
+  if(nextBtn) {
+    nextBtn.onclick=()=>{
+      if(!S.completedFiches.includes(f.num)){S.completedFiches.push(f.num);save();}
+      if(S.currentFiche<FICHES.length-1){S.currentFiche++;renderFiche();window.scrollTo(0,0);}
+      else{toast('🎉 Toutes les fiches lues !','success');showScreen('fiches');}
+    };
+  }
+
   // Bandeau mise à jour
   const updateBar = document.createElement('div');
   updateBar.className = 'fiche-update-bar';
@@ -211,7 +237,7 @@ function renderFiche(){
     </button>
     <div class="fiche-update-result" id="update-result-${f.num}"></div>
   `;
-  document.getElementById('fiche-content-area').appendChild(updateBar);
+  if(contentArea) contentArea.appendChild(updateBar);
 }
 
 async function checkFicheUpdate(idx) {
@@ -234,13 +260,13 @@ async function checkFicheUpdate(idx) {
       body: JSON.stringify({
         messages: [{
           role: 'user',
-          content: `Tu es un expert en droit du travail français. Vérifie si le contenu de cette fiche est toujours à jour en 2026 en cherchant sur le web les éventuelles modifications législatives récentes.\n\nFiche : "${f.title}"\n\nContenu actuel :\n${content}\n\nRéponds en français avec :\n1. Un statut clair : ✅ À jour ou ⚠️ Modifications détectées\n2. Si des modifications existent, liste-les précisément avec les nouvelles valeurs\n3. Cite tes sources`
+          content: `Tu es un expert en droit du travail français. Vérifie si le contenu de cette fiche est toujours à jour en cherchant sur le web les éventuelles modifications législatives récentes.\n\nFiche : "${f.title}"\n\nContenu actuel :\n${content}\n\nRéponds en français avec :\n1. Un statut clair : ✅ À jour ou ⚠️ Modifications détectées\n2. Si des modifications existent, liste-les précisément avec les nouvelles valeurs\n3. Cite tes sources`
         }]
       })
     });
     const data = await res.json();
     const reply = data.content?.[0]?.text || 'Impossible de vérifier.';
-    const isWarn = reply.includes('⚠') || reply.toLowerCase().includes('modification');
+    const isWarn = reply.includes('⚠️') || reply.toLowerCase().includes('modification');
     result.className = `fiche-update-result show ${isWarn ? 'warn' : 'ok'}`;
     result.innerHTML = marked.parse(reply);
     arrow.textContent = isWarn ? '⚠️' : '✅';
@@ -256,12 +282,11 @@ async function checkFicheUpdate(idx) {
 // =============================================
 // FLASHCARDS + SPACED REPETITION
 // =============================================
-const FC_TAGS=['Toutes',...[...new Set(FLASHCARDS.map(f=>f.tag))]];
-
 function initFlashcards(){
-  // Build filter buttons
+  if(typeof FLASHCARDS === 'undefined') return;
+  const FC_TAGS=['Toutes',...[...new Set(FLASHCARDS.map(f=>f.tag))]];
   const fc=document.getElementById('fc-filter');
-  fc.innerHTML=FC_TAGS.map((t,i)=>`<button class="fc-filter-btn${i===0?' active':''}" onclick="setFcFilter('${t}')">${t}</button>`).join('');
+  if(fc) fc.innerHTML=FC_TAGS.map((t,i)=>`<button class="fc-filter-btn${i===0?' active':''}" onclick="setFcFilter('${t}')">${t}</button>`).join('');
   filterCards();
   renderFlashcard();
   updateSRBadges();
@@ -278,27 +303,39 @@ function setFcFilter(tag){
 }
 
 function filterCards(){
+  if(typeof FLASHCARDS === 'undefined') return;
   if(S.fcFilter==='Toutes'){S.activeCards=FLASHCARDS.map((_,i)=>i);}
   else{S.activeCards=FLASHCARDS.map((_,i)=>i).filter(i=>FLASHCARDS[i].tag===S.fcFilter);}
 }
 
 function renderFlashcard(){
-  if(!S.activeCards.length){document.getElementById('fiche-content-area')&&(document.getElementById('fiche-content-area').textContent='');return;}
+  if(!S.activeCards.length){
+    const area = document.getElementById('fiche-content-area');
+    if(area) area.textContent='';
+    return;
+  }
   const idx=S.activeCards[S.currentCard%S.activeCards.length];
   const card=FLASHCARDS[idx];
   S.cardFlipped=false;
-  document.getElementById('card-scene').classList.remove('flipped');
-  document.getElementById('fc-tag').textContent=card.tag;
-  document.getElementById('fc-question').textContent=card.q;
-  document.getElementById('fc-answer').textContent=card.a;
-  document.getElementById('fc-counter').textContent=`${(S.currentCard%S.activeCards.length)+1} / ${S.activeCards.length}`;
-  document.getElementById('sr-feedback').classList.remove('show');
+  document.getElementById('card-scene')?.classList.remove('flipped');
+  
+  const fcTag = document.getElementById('fc-tag');
+  if(fcTag) fcTag.textContent=card.tag;
+  const fcQ = document.getElementById('fc-question');
+  if(fcQ) fcQ.textContent=card.q;
+  const fcA = document.getElementById('fc-answer');
+  if(fcA) fcA.textContent=card.a;
+  
+  const fcCounter = document.getElementById('fc-counter');
+  if(fcCounter) fcCounter.textContent=`${(S.currentCard%S.activeCards.length)+1} / ${S.activeCards.length}`;
+  
+  document.getElementById('sr-feedback')?.classList.remove('show');
 }
 
 function flipCard(){
   S.cardFlipped=!S.cardFlipped;
-  document.getElementById('card-scene').classList.toggle('flipped',S.cardFlipped);
-  if(S.cardFlipped) document.getElementById('sr-feedback').classList.add('show');
+  document.getElementById('card-scene')?.classList.toggle('flipped',S.cardFlipped);
+  if(S.cardFlipped) document.getElementById('sr-feedback')?.classList.add('show');
 }
 
 function srRate(rating){
@@ -314,9 +351,12 @@ function srRate(rating){
 
 function updateSRBadges(){
   const {n,l,k}=getSRCounts();
-  document.getElementById('sr-new-count').textContent=`🆕 ${n} nouvelles`;
-  document.getElementById('sr-learning-count').textContent=`📖 ${l} en cours`;
-  document.getElementById('sr-known-count').textContent=`✅ ${k} maîtrisées`;
+  const srNew = document.getElementById('sr-new-count');
+  if(srNew) srNew.textContent=`🆕 ${n} nouvelles`;
+  const srLearn = document.getElementById('sr-learning-count');
+  if(srLearn) srLearn.textContent=`📖 ${l} en cours`;
+  const srKnown = document.getElementById('sr-known-count');
+  if(srKnown) srKnown.textContent=`✅ ${k} maîtrisées`;
 }
 
 function nextCard(){
@@ -331,9 +371,7 @@ function prevCard(){
 // =============================================
 // QUIZ
 // =============================================
-const QUIZ_CATS=['Toutes',...[...new Set(QUIZ.map(q=>q.cat))]];
-const QUIZ_FICHES=['Toutes',...[...new Set(QUIZ.map(q=>q.fiche))].sort((a,b)=>a-b).map(n=>`Fiche ${n}`)];
-let filteredQuiz=[...QUIZ];
+let filteredQuiz=[];
 let quizShuffled=[];
 
 function shuffleArray(arr){
@@ -343,11 +381,24 @@ function shuffleArray(arr){
 }
 
 function initQuiz(){
+  if(typeof QUIZ === 'undefined') return;
+  const QUIZ_CATS=['Toutes',...[...new Set(QUIZ.map(q=>q.cat))]];
+  const QUIZ_FICHES=['Toutes',...[...new Set(QUIZ.map(q=>q.fiche))].sort((a,b)=>a-b).map(n=>`Fiche ${n}`)];
+  filteredQuiz=[...QUIZ];
+
   if(!S.quizFicheFilter) S.quizFicheFilter='Toutes';
   const qf=document.getElementById('quiz-filter');
+  if(!qf) return;
+  
   const catBtns=QUIZ_CATS.map((c,i)=>`<button class="q-filter-btn${i===0?' active':''}" onclick="setQuizFilter('cat','${c}')">${c}</button>`).join('');
   const ficheBtns=QUIZ_FICHES.map((f,i)=>`<button class="q-filter-btn q-filter-fiche${i===0?' active':''}" onclick="setQuizFilter('fiche','${f}')">${f}</button>`).join('');
-  qf.innerHTML=`<div style="display:flex;flex-direction:column;gap:.4rem;width:100%"><div style="font-size:.7rem;color:var(--text-muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Par catégorie</div><div style="display:flex;flex-wrap:wrap;gap:.35rem">${catBtns}</div><div style="font-size:.7rem;color:var(--text-muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-top:.25rem">Par fiche</div><div style="display:flex;flex-wrap:wrap;gap:.35rem">${ficheBtns}</div></div>`;
+  
+  qf.innerHTML=`<div style="display:flex;flex-direction:column;gap:.4rem;width:100%">
+    <div style="font-size:.7rem;color:var(--text-muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Par catégorie</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.35rem">${catBtns}</div>
+    <div style="font-size:.7rem;color:var(--text-muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-top:.25rem">Par fiche</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.35rem">${ficheBtns}</div>
+  </div>`;
   applyFilters();
 }
 
@@ -365,6 +416,7 @@ function setQuizFilter(type,val){
 }
 
 function applyFilters(){
+  if(typeof QUIZ === 'undefined') return;
   let q=[...QUIZ];
   if(S.quizFilter&&S.quizFilter!=='Toutes') q=q.filter(x=>x.cat===S.quizFilter);
   if(S.quizFicheFilter&&S.quizFicheFilter!=='Toutes') q=q.filter(x=>`Fiche ${x.fiche}`===S.quizFicheFilter);
@@ -373,9 +425,9 @@ function applyFilters(){
 }
 
 function restartQuiz(){
+  if(typeof QUIZ === 'undefined') return;
   S.currentQ=0;S.quizScore=0;S.quizAnswered=false;S.quizDone=false;
   quizShuffled=shuffleArray(filteredQuiz.length?filteredQuiz:[...QUIZ]);
-  // Clear quiz area and actions before rendering first question
   const area=document.getElementById('quiz-area');
   const actions=document.getElementById('quiz-actions');
   if(area) area.innerHTML='';
@@ -392,16 +444,24 @@ function renderQuizQuestion(){
   const newCorrect=shuffledIdx.indexOf(q.correct);
   const shuffledOpts=shuffledIdx.map(i=>q.opts[i]);
   const pct=(S.currentQ/quizShuffled.length)*100;
-  document.getElementById('quiz-bar').style.width=pct+'%';
-  document.getElementById('quiz-subtitle').textContent=`Question ${S.currentQ+1}/${quizShuffled.length} — Score : ${S.quizScore}`;
-  document.getElementById('quiz-area').innerHTML=`
+  
+  const bar = document.getElementById('quiz-bar');
+  if(bar) bar.style.width=pct+'%';
+  
+  const subtitle = document.getElementById('quiz-subtitle');
+  if(subtitle) subtitle.textContent=`Question ${S.currentQ+1}/${quizShuffled.length} — Score : ${S.quizScore}`;
+  
+  const area = document.getElementById('quiz-area');
+  if(area) area.innerHTML=`
     <div class="question-card">
       <div class="q-meta">Fiche ${q.fiche} · ${q.cat}</div>
       <div class="q-text">${q.q}</div>
       <div class="options-list">${shuffledOpts.map((o,i)=>`<button class="opt-btn" onclick="selectAnswer(${i},${newCorrect})">${o}</button>`).join('')}</div>
       <div class="explanation" id="expl"><strong>Explication :</strong> ${q.expl}</div>
     </div>`;
-  document.getElementById('quiz-actions').innerHTML=`
+    
+  const actions = document.getElementById('quiz-actions');
+  if(actions) actions.innerHTML=`
     <button class="btn-secondary" onclick="prevQuestion()" ${S.currentQ===0?'style="visibility:hidden"':''}>← Précédente</button>
     <button class="btn-secondary" onclick="nextQuestion()">Passer →</button>`;
 }
@@ -416,7 +476,7 @@ function selectAnswer(idx,correctIdx){
   });
   if(idx===correctIdx){S.quizScore++;toast('✓ Bonne réponse !','success');}
   else toast('✗ Mauvaise réponse','error');
-  document.getElementById('expl').classList.add('show');
+  document.getElementById('expl')?.classList.add('show');
   document.getElementById('quiz-subtitle').textContent=`Question ${S.currentQ+1}/${quizShuffled.length} — Score : ${S.quizScore}`;
   document.getElementById('quiz-actions').innerHTML=`
     <button class="btn-secondary" onclick="prevQuestion()" ${S.currentQ===0?'style="visibility:hidden"':''}>← Précédente</button>
@@ -439,9 +499,15 @@ function renderResults(){
   if(S.bestScore===null||pct>S.bestScore){S.bestScore=pct;save();}
   const emoji=pct>=80?'🏆':pct>=60?'💪':'📚';
   const msg=pct>=80?'Excellent !':pct>=60?'Bon travail !':'Continuez à réviser !';
-  document.getElementById('quiz-bar').style.width='100%';
-  document.getElementById('quiz-subtitle').textContent='Quiz terminé';
-  document.getElementById('quiz-area').innerHTML=`
+  
+  const bar = document.getElementById('quiz-bar');
+  if(bar) bar.style.width='100%';
+  
+  const subtitle = document.getElementById('quiz-subtitle');
+  if(subtitle) subtitle.textContent='Quiz terminé';
+  
+  const area = document.getElementById('quiz-area');
+  if(area) area.innerHTML=`
     <div class="results-wrap"><div class="results-card">
       <div class="results-score">${pct}%</div>
       <div class="results-label">${emoji} ${msg}</div>
@@ -451,7 +517,9 @@ function renderResults(){
       </div>
       <button class="btn-primary" onclick="restartQuiz()" style="margin-top:.5rem">🔀 Recommencer</button>
     </div></div>`;
-  document.getElementById('quiz-actions').innerHTML='';
+    
+  const actions = document.getElementById('quiz-actions');
+  if(actions) actions.innerHTML='';
   updateHome();
 }
 
@@ -459,7 +527,10 @@ function renderResults(){
 // RECAP
 // =============================================
 function renderRecap(){
-  document.getElementById('recap-list').innerHTML=RECAP.map((s,i)=>`
+  if(typeof RECAP === 'undefined') return;
+  const list = document.getElementById('recap-list');
+  if(!list) return;
+  list.innerHTML=RECAP.map((s,i)=>`
     <div class="recap-section">
       <div class="recap-head" onclick="toggleRecap(${i})">
         <div class="recap-head-title">${s.title}</div>
@@ -479,8 +550,8 @@ function renderRecap(){
 function toggleRecap(i){
   const b=document.getElementById('rb-'+i);
   const c=document.getElementById('chev-'+i);
-  b.classList.toggle('open');
-  c.textContent=b.classList.contains('open')?'▲':'▼';
+  if(b) b.classList.toggle('open');
+  if(c) c.textContent=b.classList.contains('open')?'▲':'▼';
 }
 
 // =============================================
@@ -489,14 +560,16 @@ function toggleRecap(i){
 function toggleTheme(){
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   document.documentElement.setAttribute('data-theme',isDark?'light':'dark');
-  document.getElementById('theme-btn').textContent=isDark?'🌙':'☀️';
+  const btn = document.getElementById('theme-btn');
+  if(btn) btn.textContent=isDark?'🌙':'☀️';
   localStorage.setItem('ls_theme',isDark?'light':'dark');
 }
 // Load saved theme
 const savedTheme=localStorage.getItem('ls_theme');
 if(savedTheme){
   document.documentElement.setAttribute('data-theme',savedTheme);
-  document.getElementById('theme-btn').textContent=savedTheme==='light'?'🌙':'☀️';
+  const btn = document.getElementById('theme-btn');
+  if(btn) btn.textContent=savedTheme==='light'?'🌙':'☀️';
 }
 
 // =============================================
@@ -504,6 +577,7 @@ if(savedTheme){
 // =============================================
 function toast(msg,type=''){
   const t=document.getElementById('toast');
+  if(!t) return;
   t.textContent=msg;t.className='toast show '+(type||'');
   clearTimeout(t._t);
   t._t=setTimeout(()=>t.className='toast',2500);
@@ -558,9 +632,12 @@ function detectTag(text) {
 
 function renderBlogFilters() {
   const tags = ['Tous', ...new Set(blogPosts.map(p => p.tag))];
-  document.getElementById('blog-filter').innerHTML = tags.map(t =>
-    `<button class="blog-filter-btn${t==='Tous'?' active':''}" onclick="setBlogFilter('${t}')">${t}</button>`
-  ).join('');
+  const filterEl = document.getElementById('blog-filter');
+  if(filterEl) {
+    filterEl.innerHTML = tags.map(t =>
+      `<button class="blog-filter-btn${t==='Tous'?' active':''}" onclick="setBlogFilter('${t}')">${t}</button>`
+    ).join('');
+  }
 }
 
 function setBlogFilter(tag) {
@@ -570,12 +647,14 @@ function setBlogFilter(tag) {
 }
 
 function renderBlog() {
+  const grid = document.getElementById('blog-grid');
+  if(!grid) return;
   const filtered = blogFilter === 'Tous' ? blogPosts : blogPosts.filter(p => p.tag === blogFilter);
   if (!filtered.length) {
-    document.getElementById('blog-grid').innerHTML = `<div class="blog-error"><p>Aucun article dans cette catégorie.</p></div>`;
+    grid.innerHTML = `<div class="blog-error"><p>Aucun article dans cette catégorie.</p></div>`;
     return;
   }
-  document.getElementById('blog-grid').innerHTML = filtered.map(p => `
+  grid.innerHTML = filtered.map(p => `
     <a class="blog-card" href="${p.link}" target="_blank" rel="noopener">
       <div class="blog-card-tag">${p.tag}</div>
       <div class="blog-card-title">${p.title}</div>
@@ -588,12 +667,15 @@ function renderBlog() {
 }
 
 function showBlogError() {
-  document.getElementById('blog-grid').innerHTML = `
-    <div class="blog-error">
-      <p style="font-size:2rem;margin-bottom:.5rem">📡</p>
-      <p style="font-weight:600;margin-bottom:.5rem">Impossible de charger les articles</p>
-      <p style="font-size:.83rem">Consulte directement le blog sur <a href="${SUBSTACK_URL}" target="_blank">Substack</a></p>
-    </div>`;
+  const grid = document.getElementById('blog-grid');
+  if(grid) {
+    grid.innerHTML = `
+      <div class="blog-error">
+        <p style="font-size:2rem;margin-bottom:.5rem">📡</p>
+        <p style="font-weight:600;margin-bottom:.5rem">Impossible de charger les articles</p>
+        <p style="font-size:.83rem">Consulte directement le blog sur <a href="${SUBSTACK_URL}" target="_blank">Substack</a></p>
+      </div>`;
+  }
 }
 
 // =============================================
@@ -620,7 +702,6 @@ async function submitSubscribe(e) {
       body: formData,
       mode: 'no-cors'
     });
-    // no-cors = pas de réponse lisible mais la requête passe
     okEl.style.display = 'block';
     document.getElementById('subscribe-form').style.display = 'none';
     toast('🎉 Inscription confirmée !', 'success');
@@ -642,10 +723,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal()});
 // =============================================
 // INIT
 // =============================================
-updateHome();
-renderRecap();
-
-
+// On retarde un peu l'initialisation pour s'assurer que data.js est bien chargé
+window.addEventListener('DOMContentLoaded', () => {
+  updateHome();
+  renderRecap();
+});
 
 // =============================================
 // CHATBOT IA
@@ -655,6 +737,7 @@ let chatHistory = [];
 
 function addMessage(role, text, typing=false) {
   const container = document.getElementById('chat-messages');
+  if(!container) return;
   const div = document.createElement('div');
   div.className = `chat-msg ${role}`;
   div.innerHTML = `<div class="chat-bubble${typing?' typing':''}">${text}</div>`;
@@ -667,11 +750,13 @@ async function sendChat() {
   if (!isPremium()) { openPremium(() => sendChat()); return; }
   const input = document.getElementById('chat-input');
   const btn = document.getElementById('chat-send');
+  if(!input || !btn) return;
+  
   const msg = input.value.trim();
   if (!msg) return;
 
-  // Hide suggestions after first message
-  document.getElementById('chat-suggestions').style.display = 'none';
+  const sugg = document.getElementById('chat-suggestions');
+  if(sugg) sugg.style.display = 'none';
 
   input.value = '';
   btn.disabled = true;
@@ -707,22 +792,31 @@ async function sendChat() {
 }
 
 function sendSugg(btn) {
-  document.getElementById('chat-input').value = btn.textContent;
-  sendChat();
+  const input = document.getElementById('chat-input');
+  if(input) {
+    input.value = btn.textContent;
+    sendChat();
+  }
 }
 
 function clearChat() {
   chatHistory = [];
   const c = document.getElementById('chat-messages');
-  c.innerHTML = `<div class="chat-msg ai"><div class="chat-bubble">⚖️ Bonjour ! Je suis votre assistant juriste spécialisé en droit du travail français.<br><br>Posez-moi vos questions sur les contrats, licenciements, congés, salaires, représentation du personnel…</div></div>`;
-  document.getElementById('chat-suggestions').style.display = 'flex';
+  if(c) {
+    c.innerHTML = `<div class="chat-msg ai"><div class="chat-bubble">⚖️ Bonjour ! Je suis votre assistant juriste spécialisé en droit du travail français.<br><br>Posez-moi vos questions sur les contrats, licenciements, congés, salaires, représentation du personnel…</div></div>`;
+  }
+  const sugg = document.getElementById('chat-suggestions');
+  if(sugg) sugg.style.display = 'flex';
 }
 
 // =============================================
-// VEILLE LÉGISLATIVE
+// VEILLE LÉGISLATIVE (Sécurisée)
 // =============================================
 function initVeille() {
   const sel = document.getElementById('veille-fiche-select');
+  // SÉCURITÉ : si l'élément HTML n'existe pas, on arrête la fonction ici
+  if (!sel || typeof FICHES === 'undefined') return; 
+  
   if (sel.options.length > 1) return;
   FICHES.forEach(f => {
     const opt = document.createElement('option');
@@ -736,6 +830,9 @@ async function checkVeille() {
   const sel = document.getElementById('veille-fiche-select');
   const btn = document.getElementById('veille-btn');
   const result = document.getElementById('veille-result');
+  
+  if (!sel || !btn || !result || typeof FICHES === 'undefined') return;
+  
   const idx = sel.value;
   if (idx === '') { alert('Choisissez une fiche !'); return; }
 
