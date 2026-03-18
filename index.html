@@ -13,28 +13,29 @@
 <header class="header">
   <div class="header-inner">
     <div class="logo">⚖️ Le Droit du Travail Facile</div>
-    <nav class="top-nav">
-      <button class="top-nav-tab active" onclick="showScreen('home')">Accueil</button>
-      <button class="top-nav-tab" onclick="showScreen('fiches')">📚 Fiches</button>
-      <button class="top-nav-tab" onclick="showScreen('flashcards')">🃏 Flashcards</button>
-      <button class="top-nav-tab" onclick="showScreen('quiz')">🎯 Quiz</button>
-      <button class="top-nav-tab" onclick="showScreen('recap')">📋 Récap</button>
-      <button class="top-nav-tab" onclick="showScreen('blog')">✍️ Blog</button>
-      <button class="top-nav-tab" onclick="showScreen('chat')">⚖️ Juriste</button>
+    <nav class="top-nav" role="navigation" aria-label="Navigation principale">
+      <button class="top-nav-tab active" onclick="showScreen('home')" aria-label="Accueil">Accueil</button>
+      <button class="top-nav-tab" onclick="showScreen('fiches')" aria-label="Fiches de cours">📚 Fiches</button>
+      <button class="top-nav-tab" onclick="showScreen('flashcards')" aria-label="Flashcards">🃏 Flashcards</button>
+      <button class="top-nav-tab" onclick="showScreen('quiz')" aria-label="Quiz">🎯 Quiz</button>
+      <button class="top-nav-tab" onclick="showScreen('recap')" aria-label="Récapitulatif">📋 Récap</button>
+      <button class="top-nav-tab" onclick="showScreen('blog')" aria-label="Blog">✍️ Blog</button>
+      <button class="top-nav-tab" onclick="showScreen('chat')" aria-label="Assistant Juriste IA">⚖️ Juriste</button>
     </nav>
     <div class="header-actions">
-      <button class="subscribe-btn" id="header-sub-btn">📧 S'abonner</button>
-      <div class="progress-chip" id="global-progress">0/28</div>
+      <button class="subscribe-btn" id="header-sub-btn" aria-label="S'abonner à la newsletter">📧 S'abonner</button>
+      <button class="dark-toggle" id="dark-toggle" onclick="toggleDarkMode()" aria-label="Passer en mode sombre">🌙</button>
+      <div class="progress-chip" id="global-progress" aria-live="polite">0/28</div>
     </div>
   </div>
 </header>
 
-<nav class="bottom-nav">
-  <button class="bottom-nav-item active" onclick="showScreen('home')"><span class="nav-icon">🏠</span>Accueil</button>
-  <button class="bottom-nav-item" onclick="showScreen('fiches')"><span class="nav-icon">📚</span>Fiches</button>
-  <button class="bottom-nav-item" onclick="showScreen('quiz')"><span class="nav-icon">🎯</span>Quiz</button>
-  <button class="bottom-nav-item" onclick="showScreen('blog')"><span class="nav-icon">✍️</span>Blog</button>
-  <button class="bottom-nav-item" onclick="showScreen('chat')"><span class="nav-icon">⚖️</span>Juriste</button>
+<nav class="bottom-nav" role="navigation" aria-label="Navigation mobile">
+  <button class="bottom-nav-item active" onclick="showScreen('home')" aria-label="Accueil"><span class="nav-icon" aria-hidden="true">🏠</span>Accueil</button>
+  <button class="bottom-nav-item" onclick="showScreen('fiches')" aria-label="Fiches de cours"><span class="nav-icon" aria-hidden="true">📚</span>Fiches</button>
+  <button class="bottom-nav-item" onclick="showScreen('quiz')" aria-label="Quiz"><span class="nav-icon" aria-hidden="true">🎯</span>Quiz</button>
+  <button class="bottom-nav-item" onclick="showScreen('blog')" aria-label="Blog"><span class="nav-icon" aria-hidden="true">✍️</span>Blog</button>
+  <button class="bottom-nav-item" onclick="showScreen('chat')" aria-label="Assistant Juriste IA"><span class="nav-icon" aria-hidden="true">⚖️</span>Juriste</button>
 </nav>
 
 <div id="screen-home" class="screen active">
@@ -49,7 +50,7 @@
       </div>
       <div class="lm-form-wrap">
         <form id="subscribe-form" class="lm-form" onsubmit="submitSubscribe(event)">
-          <input type="email" id="subscribe-email" placeholder="Entrez votre e-mail ici" required />
+          <input type="email" id="subscribe-email" placeholder="Entrez votre e-mail ici" required autocomplete="email" aria-label="Votre adresse e-mail" />
           <button type="submit" id="subscribe-submit">Débloquer le site</button>
         </form>
         <div id="subscribe-success" style="display:none; color: white; font-weight: bold; margin-top: 0.5rem;">🎉 Compte activé ! Le menu est débloqué.</div>
@@ -91,13 +92,16 @@
     <h2>Les 28 Fiches</h2>
     <p>Cliquez pour lire le cours complet</p>
   </div>
+  <div class="fiches-search-wrap">
+    <input type="search" id="fiches-search" class="fiches-search" placeholder="Rechercher une fiche…" oninput="searchFiches(this.value)" aria-label="Rechercher parmi les fiches de cours" />
+  </div>
   <div id="fiches-list"></div>
 </div>
 
 <div id="screen-reader" class="screen">
   <div class="reader-container">
     <div class="reader-nav">
-      <button class="btn-back" onclick="showScreen('fiches')">← Fiches</button>
+      <button class="btn-back" onclick="showScreen('fiches')" aria-label="Retour à la liste des fiches">← Fiches</button>
       <span class="reader-progress" id="reader-progress"></span>
       <button class="btn-next-fiche" id="btn-next-fiche">Suivante →</button>
     </div>
@@ -117,7 +121,7 @@
       <span class="sr-badge sr-known" id="sr-known-count">✅ 0 maîtrisées</span>
     </div>
     <div class="fc-filter" id="fc-filter"></div>
-    <div class="card-scene" id="card-scene" onclick="flipCard()">
+    <div class="card-scene" id="card-scene" onclick="flipCard()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();flipCard()}" role="button" tabindex="0" aria-label="Carte de révision — cliquer ou Espace pour retourner">
       <div class="card-inner" id="card-inner">
         <div class="card-face card-front">
           <div class="card-tag-pill" id="fc-tag">Question</div>
@@ -131,13 +135,13 @@
       </div>
     </div>
     <div class="sr-feedback" id="sr-feedback">
-      <button class="sr-btn sr-btn-no" onclick="srRate('no')">😕 À revoir</button>
-      <button class="sr-btn sr-btn-hard" onclick="srRate('hard')">🤔 Difficile</button>
-      <button class="sr-btn sr-btn-ok" onclick="srRate('ok')">✅ Su !</button>
+      <button class="sr-btn sr-btn-no" onclick="srRate('no')" aria-label="À revoir (touche 1)">😕 À revoir</button>
+      <button class="sr-btn sr-btn-hard" onclick="srRate('hard')" aria-label="Difficile (touche 2)">🤔 Difficile</button>
+      <button class="sr-btn sr-btn-ok" onclick="srRate('ok')" aria-label="Su ! (touche 3)">✅ Su !</button>
     </div>
     <div class="fc-nav">
-      <button class="fc-nav-btn fc-prev" onclick="prevCard()">← Précédente</button>
-      <button class="fc-nav-btn fc-next" onclick="nextCard()">Suivante →</button>
+      <button class="fc-nav-btn fc-prev" onclick="prevCard()" aria-label="Carte précédente (flèche gauche)">← Précédente</button>
+      <button class="fc-nav-btn fc-next" onclick="nextCard()" aria-label="Carte suivante (flèche droite)">Suivante →</button>
     </div>
   </div>
 </div>
@@ -189,7 +193,7 @@
           <div class="chat-panel-title">⚖️ Juriste Droit du Travail</div>
           <div class="chat-panel-sub">Posez vos questions sur le droit du travail français</div>
         </div>
-        <button class="chat-clear-btn" onclick="clearChat()">🗑️ Effacer</button>
+        <button class="chat-clear-btn" onclick="clearChat()" aria-label="Effacer la conversation">🗑️ Effacer</button>
       </div>
       <div class="chat-messages" id="chat-messages">
         <div class="chat-msg ai">
@@ -203,8 +207,11 @@
         <button class="chat-sugg" onclick="sendSugg(this)">Combien de jours de congés payés par an ?</button>
       </div>
       <div class="chat-input-row">
-        <input type="text" id="chat-input" class="chat-input" placeholder="Posez votre question…" onkeydown="if(event.key==='Enter') sendChat()"/>
-        <button class="chat-send-btn" onclick="sendChat()" id="chat-send">➤</button>
+        <input type="text" id="chat-input" class="chat-input" placeholder="Posez votre question…" onkeydown="if(event.key==='Enter') sendChat()" aria-label="Votre question"/>
+        <button class="chat-send-btn" onclick="sendChat()" id="chat-send" aria-label="Envoyer le message">➤</button>
+      </div>
+      <div class="chat-disclaimer" role="note">
+        ⚠️ Ces réponses sont informatives et ne constituent pas un avis juridique. Consultez un professionnel pour votre situation. Base légale : janvier 2025.
       </div>
     </div>
   </div>
@@ -214,7 +221,7 @@
 
 <div class="premium-overlay" id="premium-overlay">
   <div class="premium-box">
-    <button class="premium-close" onclick="closePremium()">✕</button>
+    <button class="premium-close" onclick="closePremium()" aria-label="Fermer">✕</button>
     <div class="premium-title">Fonctionnalité Premium</div>
     <div class="premium-desc">Cette fonctionnalité est réservée aux membres. Soutenez le projet pour 3€/mois et recevez votre code d'accès instantanément.</div>
     <input type="text" class="premium-input" id="premium-code-input" placeholder="DROIT-XXXX-XXXX" maxlength="15"/>

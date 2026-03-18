@@ -127,22 +127,23 @@ function getSRCounts(){
 // =============================================
 // NAVIGATION & VERROUILLAGE (PÉAGE)
 // =============================================
+// Écrans accessibles sans inscription email (3 premières fiches libres via openFiche)
+const PUBLIC_SCREENS = ['home', 'fiches'];
+let _suppressHistory = false;
+
 function showScreen(name){
-  // Vérifie si l'utilisateur s'est inscrit
   const isRegistered = localStorage.getItem('ls_registered') === 'true';
 
-  // LE PÉAGE : Si pas inscrit ET essaie d'aller ailleurs que l'accueil
-  if (!isRegistered && name !== 'home') {
+  // Gating : fiches et accueil sont publics, le reste nécessite une inscription
+  if (!isRegistered && !PUBLIC_SCREENS.includes(name)) {
     toast('🔒 Entrez votre e-mail sur l\'accueil pour débloquer le contenu.', 'warn');
-    
-    // On le force à rester sur l'accueil
     if (!document.getElementById('screen-home').classList.contains('active')) {
+      _suppressHistory = true;
       showScreen('home');
+      _suppressHistory = false;
     }
-    
-    // Fait défiler la page doucement jusqu'au formulaire rouge
     document.getElementById('lead-magnet')?.scrollIntoView({behavior: 'smooth'});
-    return; // On arrête la fonction ici
+    return;
   }
 
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -166,8 +167,30 @@ function showScreen(name){
     }
     initVeille();
   }
+
+  // History API — active le bouton retour natif du navigateur
+  if (!_suppressHistory && location.hash !== '#' + name) {
+    history.pushState({ screen: name }, '', '#' + name);
+  }
+
+  // Gestion du focus pour accessibilité clavier / lecteurs d'écran
+  const activeScreen = document.getElementById('screen-' + name);
+  const firstH = activeScreen?.querySelector('h1, h2');
+  if (firstH) {
+    firstH.setAttribute('tabindex', '-1');
+    firstH.focus({ preventScroll: true });
+  }
+
   window.scrollTo(0,0);
 }
+
+// Gestion du bouton Retour/Avant du navigateur
+window.addEventListener('popstate', () => {
+  const screen = location.hash.replace('#', '') || 'home';
+  _suppressHistory = true;
+  showScreen(screen);
+  _suppressHistory = false;
+});
 
 // =============================================
 // HOME
@@ -206,14 +229,17 @@ const PARTIES=[
 
 function renderFichesList(){
   if(typeof FICHES === 'undefined') return;
+  const isRegistered = localStorage.getItem('ls_registered') === 'true';
+  const FREE_FICHE_COUNT = 3;
   let html='';
   PARTIES.forEach(p=>{
     const fiches=FICHES.filter(f=>f.num>=p.range[0]&&f.num<=p.range[1]);
     html+=`<div class="partie-section"><div class="partie-label">${p.label}</div><div class="fiches-row">`;
     fiches.forEach(f=>{
       const done=S.completedFiches.includes(f.num);
-      html+=`<div class="fiche-card" onclick="openFiche(${f.num-1})">
-        <div class="fiche-number">Fiche ${f.num}</div>
+      const locked=!isRegistered && (f.num-1) >= FREE_FICHE_COUNT;
+      html+=`<div class="fiche-card${locked?' fiche-locked':''}" onclick="openFiche(${f.num-1})" aria-label="Fiche ${f.num} : ${f.title}${locked?' (verrouillée)':''}">
+        <div class="fiche-number">Fiche ${f.num}${locked?' <span class="fiche-lock-icon" aria-hidden="true">🔒</span>':''}</div>
         <div class="fiche-title">${f.title}</div>
         ${done?'<div class="fiche-done-badge">✓ Lu</div>':''}
       </div>`;
@@ -226,6 +252,14 @@ function renderFichesList(){
 }
 
 function openFiche(idx){
+  const isRegistered = localStorage.getItem('ls_registered') === 'true';
+  const FREE_FICHE_COUNT = 3; // Les 3 premières fiches sont accessibles sans inscription
+  if (!isRegistered && idx >= FREE_FICHE_COUNT) {
+    toast('🔒 Inscrivez-vous gratuitement pour accéder à toutes les fiches.', 'warn');
+    showScreen('home');
+    setTimeout(() => document.getElementById('lead-magnet')?.scrollIntoView({behavior:'smooth'}), 300);
+    return;
+  }
   S.currentFiche=idx;
   renderFiche();
   showScreen('reader');
@@ -283,7 +317,7 @@ async function checkFicheUpdate(idx) {
       body: JSON.stringify({
         messages: [{
           role: 'user',
-          content: `Tu es un expert en droit du travail français. Vérifie si le contenu de cette fiche est toujours à jour en cherchant sur le web les éventuelles modifications législatives récentes.\n\nFiche : "${f.title}"\n\nContenu actuel :\n${content}\n\nRéponds en français avec :\n1. Un statut clair : ✅ À jour ou ⚠️ Modifications détectées\n2. Si des modifications existent, liste-les précisément avec les nouvelles valeurs\n3. Cite tes sources`
+          content: `[Date du jour : ${new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'})}]\n\nTu es un expert en droit du travail français spécialisé dans les lois en vigueur en 2025-2026. Vérifie si le contenu de cette fiche est toujours à jour, en tenant compte des modifications législatives récentes.\n\nFiche : "${f.title}"\n\nContenu actuel :\n${content}\n\nRéponds en français avec :\n1. Un statut clair : ✅ À jour ou ⚠️ Modifications détectées\n2. Si des modifications existent, liste-les précisément (nouveaux montants, nouvelles durées, nouveaux textes)\n3. Vérifie notamment : SMIC 2025-2026, PASS 2026, délais légaux, jurisprudences récentes de la Cour de cassation\n4. Cite tes sources (articles du Code du travail, décrets, arrêts)`
         }]
       })
     });
@@ -734,6 +768,74 @@ async function submitSubscribe(e) {
 }
 
 // =============================================
+// RACCOURCIS CLAVIER — Flashcards
+// =============================================
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('screen-flashcards')?.classList.contains('active')) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  switch(e.key) {
+    case 'ArrowLeft':  prevCard(); break;
+    case 'ArrowRight': nextCard(); break;
+    case ' ':
+    case 'Enter':
+      e.preventDefault();
+      flipCard();
+      break;
+    case '1': if (S.cardFlipped) { e.preventDefault(); srRate('no'); } break;
+    case '2': if (S.cardFlipped) { e.preventDefault(); srRate('hard'); } break;
+    case '3': if (S.cardFlipped) { e.preventDefault(); srRate('ok'); } break;
+  }
+});
+
+// =============================================
+// RECHERCHE FICHES
+// =============================================
+function searchFiches(query) {
+  if (typeof FICHES === 'undefined') return;
+  const q = query.trim().toLowerCase();
+  const listEl = document.getElementById('fiches-list');
+  if (!listEl) return;
+  if (!q) { renderFichesList(); return; }
+
+  const isRegistered = localStorage.getItem('ls_registered') === 'true';
+  const FREE_FICHE_COUNT = 3;
+  const results = FICHES.filter(f =>
+    f.title.toLowerCase().includes(q) || String(f.num).includes(q)
+  );
+
+  if (!results.length) {
+    listEl.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">Aucune fiche trouvée pour "<strong>${query}</strong>"</div>`;
+    return;
+  }
+
+  let html = `<div class="partie-section"><div class="partie-label">Résultats (${results.length})</div><div class="fiches-row">`;
+  results.forEach(f => {
+    const done = S.completedFiches.includes(f.num);
+    const locked = !isRegistered && (f.num - 1) >= FREE_FICHE_COUNT;
+    html += `<div class="fiche-card${locked ? ' fiche-locked' : ''}" onclick="openFiche(${f.num - 1})" aria-label="Fiche ${f.num} : ${f.title}">
+      <div class="fiche-number">Fiche ${f.num}${locked ? ' <span class="fiche-lock-icon" aria-hidden="true">🔒</span>' : ''}</div>
+      <div class="fiche-title">${f.title}</div>
+      ${done ? '<div class="fiche-done-badge">✓ Lu</div>' : ''}
+    </div>`;
+  });
+  html += '</div></div>';
+  listEl.innerHTML = html;
+}
+
+// =============================================
+// MODE SOMBRE
+// =============================================
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('ls_dark', isDark ? 'true' : 'false');
+  const btn = document.getElementById('dark-toggle');
+  if (btn) {
+    btn.textContent = isDark ? '☀️' : '🌙';
+    btn.setAttribute('aria-label', isDark ? 'Passer en mode clair' : 'Passer en mode sombre');
+  }
+}
+
+// =============================================
 // INIT
 // =============================================
 window.addEventListener('DOMContentLoaded', () => {
@@ -767,6 +869,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
   updateHome();
   renderRecap();
+
+  // Dark mode : respecte la préférence sauvegardée ou le réglage système
+  const darkPref = localStorage.getItem('ls_dark');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (darkPref === 'true' || (darkPref === null && prefersDark)) {
+    document.body.classList.add('dark');
+    const btn = document.getElementById('dark-toggle');
+    if (btn) { btn.textContent = '☀️'; btn.setAttribute('aria-label', 'Passer en mode clair'); }
+  }
+
+  // Restaure l'écran depuis l'URL au chargement initial (ex: #fiches)
+  const hashScreen = location.hash.replace('#', '');
+  if (hashScreen && hashScreen !== 'home' && document.getElementById('screen-' + hashScreen)) {
+    showScreen(hashScreen);
+  }
 });
 
 // =============================================
@@ -809,7 +926,10 @@ async function sendChat() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: chatHistory })
+      body: JSON.stringify({
+        messages: chatHistory,
+        systemContext: `Date du jour : ${new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'})}. Tu es un expert en droit du travail FRANÇAIS uniquement. Tu maîtrises les lois et barèmes en vigueur en 2025-2026 (SMIC, PASS, réformes récentes). Si une valeur peut avoir évolué récemment, précise-le. Réponds toujours en français avec des références légales précises (articles du Code du travail, décrets, jurisprudences).`
+      })
     });
     const data = await res.json();
     if (!res.ok || data.error) {
@@ -888,7 +1008,7 @@ async function checkVeille() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         mode: 'veille',
-        messages: [{ role: 'user', content: `Analyse cette fiche de droit du travail :\n\nTitre : ${fiche.title}\n\nContenu : ${content}` }]
+        messages: [{ role: 'user', content: `[Date du jour : ${new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'})}]\n\nAnalyse cette fiche de droit du travail français et détermine si son contenu est toujours en vigueur en 2025-2026 :\n\nTitre : ${fiche.title}\n\nContenu : ${content}` }]
       })
     });
     const data = await res.json();
