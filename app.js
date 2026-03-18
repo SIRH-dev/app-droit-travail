@@ -128,7 +128,7 @@ function getSRCounts(){
 // NAVIGATION & VERROUILLAGE (PÉAGE)
 // =============================================
 // Écrans accessibles sans inscription email (3 premières fiches libres via openFiche)
-const PUBLIC_SCREENS = ['home', 'fiches', 'reader'];
+const PUBLIC_SCREENS = ['home', 'fiches', 'reader', 'blog'];
 let _suppressHistory = false;
 
 function showScreen(name){
