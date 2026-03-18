@@ -62,9 +62,9 @@ body{
 @media(min-width:768px){
   .bottom-nav{display:none}
   body{padding-bottom:0}
-  .top-nav{display:flex;gap:.5rem;flex:1;margin-left:2rem;overflow-x:auto;scrollbar-width:none}
+  .top-nav{display:flex;gap:.25rem;flex:1;margin-left:1rem;overflow-x:auto;scrollbar-width:none}
   .top-nav::-webkit-scrollbar{display:none}
-  .top-nav-tab{padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;white-space:nowrap;transition:all .2s;color:var(--text-muted);border:none;background:transparent;font-family:'DM Sans',sans-serif}
+  .top-nav-tab{padding:.4rem .6rem;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;white-space:nowrap;transition:all .2s;color:var(--text-muted);border:none;background:transparent;font-family:'DM Sans',sans-serif}
   .top-nav-tab:hover{color:var(--accent2)}
   .top-nav-tab.active{color:var(--accent); border-bottom:2px solid var(--accent); border-radius:0; padding-bottom:.2rem;}
 }
