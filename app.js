@@ -149,7 +149,7 @@ function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.top-nav-tab,.bottom-nav-item').forEach(t=>t.classList.remove('active'));
   document.getElementById('screen-'+name)?.classList.add('active');
-  const map={home:0,fiches:1,flashcards:2,quiz:3,recap:4,blog:5,chat:6};
+  const map={home:0,fiches:1,quiz:2,blog:3,chat:4};
   if(map[name]!==undefined){
     document.querySelectorAll('.top-nav-tab')[map[name]]?.classList.add('active');
     document.querySelectorAll('.bottom-nav-item')[map[name]]?.classList.add('active');
