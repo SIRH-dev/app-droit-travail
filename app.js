@@ -728,7 +728,7 @@ async function submitSubscribe(e) {
   const okEl = document.getElementById('subscribe-success');
   if (!email) return;
 
-  btn.textContent = '⏳ Déblocage en cours...';
+  btn.textContent = '⏳ Activation en cours...';
   btn.disabled = true;
   errEl.style.display = 'none';
   okEl.style.display = 'none';
@@ -762,7 +762,7 @@ async function submitSubscribe(e) {
     toast('🎉 Contenu débloqué avec succès !', 'success');
   } catch(err) {
     errEl.style.display = 'block';
-    btn.textContent = 'Débloquer le site';
+    btn.textContent = 'Accéder gratuitement';
     btn.disabled = false;
   }
 }
