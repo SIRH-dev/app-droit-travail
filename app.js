@@ -1059,9 +1059,94 @@ function closeModal(id) {
 // Fermer les modals avec la touche Échap
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    ['mentions-legales', 'confidentialite'].forEach(id => closeModal(id));
+    ['mentions-legales', 'confidentialite', 'contact'].forEach(id => closeModal(id));
   }
 });
+
+// =============================================
+// FORMULAIRE DE CONTACT (Web3Forms)
+// =============================================
+
+const WEB3FORMS_KEY = '7e39f248-a1a8-4f28-bacc-3fed8e577a8b';
+
+async function submitContactForm(event) {
+  event.preventDefault();
+
+  const form        = document.getElementById('contact-form');
+  const submitBtn   = document.getElementById('cf-submit');
+  const submitLabel = document.getElementById('cf-submit-label');
+  const errorBox    = document.getElementById('cf-error');
+  const successBox  = document.getElementById('cf-success');
+
+  // Validation côté client
+  const name    = document.getElementById('cf-name').value.trim();
+  const email   = document.getElementById('cf-email').value.trim();
+  const message = document.getElementById('cf-message').value.trim();
+  const subject = document.getElementById('cf-subject').value;
+
+  if (!name || !email || !message) {
+    errorBox.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.';
+    errorBox.style.display = 'block';
+    return;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    errorBox.textContent = '⚠️ Adresse e-mail invalide.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  errorBox.style.display = 'none';
+  submitBtn.disabled = true;
+  submitLabel.textContent = '⏳ Envoi en cours…';
+
+  try {
+    const formData = new FormData(form);
+    formData.append('access_key', WEB3FORMS_KEY);
+    formData.append('subject', `💼 [${subject}] — Le Droit du Travail Facile`);
+
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      form.style.display = 'none';
+      successBox.style.display = 'block';
+      form.reset();
+    } else {
+      errorBox.textContent = '❌ ' + (data.message || 'Une erreur est survenue. Réessayez plus tard.');
+      errorBox.style.display = 'block';
+      submitBtn.disabled = false;
+      submitLabel.textContent = 'Envoyer le message';
+    }
+  } catch (err) {
+    errorBox.textContent = '❌ Impossible d\'envoyer le message. Vérifiez votre connexion.';
+    errorBox.style.display = 'block';
+    submitBtn.disabled = false;
+    submitLabel.textContent = 'Envoyer le message';
+  }
+}
+
+// Réinitialiser le formulaire à chaque ouverture de la modal contact
+const _origShowModal = showModal;
+showModal = function(id) {
+  if (id === 'contact') {
+    const form = document.getElementById('contact-form');
+    const success = document.getElementById('cf-success');
+    const error = document.getElementById('cf-error');
+    if (form) { form.reset(); form.style.display = 'flex'; }
+    if (success) success.style.display = 'none';
+    if (error) error.style.display = 'none';
+    const submitBtn = document.getElementById('cf-submit');
+    const submitLabel = document.getElementById('cf-submit-label');
+    if (submitBtn) submitBtn.disabled = false;
+    if (submitLabel) submitLabel.textContent = 'Envoyer le message';
+  }
+  _origShowModal(id);
+};
 
 // Mettre à jour l'année du copyright dans le footer dynamiquement
 document.addEventListener('DOMContentLoaded', () => {
