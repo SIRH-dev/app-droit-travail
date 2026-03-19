@@ -1033,3 +1033,38 @@ async function checkVeille() {
   btn.disabled = false;
   btn.textContent = '🔍 Analyser';
 }
+
+// =============================================
+// MODALS LÉGALES (Mentions légales / RGPD)
+// =============================================
+function showModal(id) {
+  const el = document.getElementById('modal-' + id);
+  if (!el) return;
+  el.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // Focus sur le bouton fermer pour l'accessibilité clavier
+  requestAnimationFrame(() => {
+    const closeBtn = el.querySelector('.modal-close');
+    if (closeBtn) closeBtn.focus();
+  });
+}
+
+function closeModal(id) {
+  const el = document.getElementById('modal-' + id);
+  if (!el) return;
+  el.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Fermer les modals avec la touche Échap
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    ['mentions-legales', 'confidentialite'].forEach(id => closeModal(id));
+  }
+});
+
+// Mettre à jour l'année du copyright dans le footer dynamiquement
+document.addEventListener('DOMContentLoaded', () => {
+  const yearEl = document.getElementById('footer-year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+});

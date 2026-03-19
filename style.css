@@ -445,3 +445,28 @@ body.dark .fiches-search{background:var(--surface);color:var(--text);border-colo
 
 /* ===== DISCLAIMER CHAT ===== */
 .chat-disclaimer{padding:.55rem 1.25rem;font-size:.72rem;color:var(--text-dim);background:var(--surface2);border-top:1px solid var(--border);text-align:center;line-height:1.5}
+
+/* ===== FOOTER ===== */
+.site-footer{background:var(--surface2);border-top:1px solid var(--border);padding:2.5rem 1.25rem 4rem;margin-bottom:0}
+@media(min-width:768px){.site-footer{padding-bottom:2.5rem}}
+.footer-inner{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:1.25rem;align-items:center;text-align:center}
+.footer-logo{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:900;color:var(--accent2)}
+.footer-tagline{font-size:.8rem;color:var(--text-muted);margin-top:.3rem;line-height:1.5}
+.footer-links{display:flex;flex-wrap:wrap;gap:.5rem .75rem;justify-content:center;align-items:center;font-size:.82rem}
+.footer-links a,.footer-link-btn{color:var(--text-muted);text-decoration:none;font-weight:600;transition:color .2s;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;padding:0}
+.footer-links a:hover,.footer-link-btn:hover{color:var(--accent)}
+.footer-links span{color:var(--text-dim)}
+.footer-legal{font-size:.72rem;color:var(--text-dim);line-height:1.7;max-width:600px}
+
+/* ===== MODALS LÉGALES ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:700;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .2s ease}
+.modal-box{background:#fff;border-radius:14px;padding:2rem;width:100%;max-width:520px;position:relative;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-box h2{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--accent2);margin-bottom:1.25rem;font-weight:900;}
+.modal-box p{font-size:.87rem;color:var(--text-muted);line-height:1.75;margin-bottom:.85rem}
+.modal-box p:last-child{margin-bottom:0}
+.modal-box strong{color:var(--accent2)}
+.modal-box code{background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:'DM Mono',monospace;font-size:.8rem}
+.modal-close{position:absolute;top:1rem;right:1rem;background:var(--surface2);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-weight:bold}
+.modal-close:hover{background:var(--wrong);color:#fff}
+body.dark .modal-box{background:var(--surface);color:var(--text)}
+body.dark .modal-box p{color:var(--text-muted)}
