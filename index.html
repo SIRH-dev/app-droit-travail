@@ -337,6 +337,46 @@
   </div>
 </div>
 
+<!-- Modal Contact -->
+<div class="modal-overlay" id="modal-contact" role="dialog" aria-modal="true" aria-labelledby="modal-title-contact" style="display:none" onclick="if(event.target===this)closeModal('contact')">
+  <div class="modal-box" style="max-width:560px">
+    <button class="modal-close" onclick="closeModal('contact')" aria-label="Fermer">✕</button>
+    <h2 id="modal-title-contact">Nous contacter</h2>
+    <form id="contact-form" onsubmit="submitContactForm(event)" style="display:flex;flex-direction:column;gap:.9rem">
+      <div style="display:flex;flex-direction:column;gap:.3rem">
+        <label for="cf-name" style="font-size:.82rem;font-weight:600;color:var(--text-muted)">Nom <span aria-hidden="true">*</span></label>
+        <input id="cf-name" name="name" type="text" required placeholder="Votre nom" style="border:1.5px solid var(--border);border-radius:8px;padding:.55rem .75rem;font-size:.9rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none" />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.3rem">
+        <label for="cf-email" style="font-size:.82rem;font-weight:600;color:var(--text-muted)">E-mail <span aria-hidden="true">*</span></label>
+        <input id="cf-email" name="email" type="email" required placeholder="votre@email.fr" style="border:1.5px solid var(--border);border-radius:8px;padding:.55rem .75rem;font-size:.9rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none" />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.3rem">
+        <label for="cf-subject" style="font-size:.82rem;font-weight:600;color:var(--text-muted)">Sujet</label>
+        <select id="cf-subject" name="sujet" style="border:1.5px solid var(--border);border-radius:8px;padding:.55rem .75rem;font-size:.9rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+          <option value="Question générale">Question générale</option>
+          <option value="Signalement d'erreur">Signalement d'erreur</option>
+          <option value="Suggestion">Suggestion</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.3rem">
+        <label for="cf-message" style="font-size:.82rem;font-weight:600;color:var(--text-muted)">Message <span aria-hidden="true">*</span></label>
+        <textarea id="cf-message" name="message" required rows="5" placeholder="Votre message…" style="border:1.5px solid var(--border);border-radius:8px;padding:.55rem .75rem;font-size:.9rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+      </div>
+      <div id="cf-error" style="display:none;color:#c0392b;font-size:.83rem;font-weight:600"></div>
+      <button id="cf-submit" type="submit" style="background:var(--accent2);color:#fff;border:none;border-radius:9px;padding:.7rem 1.4rem;font-size:.95rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s">
+        <span id="cf-submit-label">Envoyer le message</span>
+      </button>
+    </form>
+    <div id="cf-success" style="display:none;text-align:center;padding:1.5rem 0">
+      <div style="font-size:2rem;margin-bottom:.5rem">✅</div>
+      <p style="font-weight:700;color:var(--accent2);margin:0">Message envoyé !</p>
+      <p style="font-size:.85rem;color:var(--text-muted);margin-top:.4rem">Nous vous répondrons dans les meilleurs délais.</p>
+    </div>
+  </div>
+</div>
+
 <div class="premium-overlay" id="premium-overlay">
   <div class="premium-box">
     <button class="premium-close" onclick="closePremium()" aria-label="Fermer">✕</button>
