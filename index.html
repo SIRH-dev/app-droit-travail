@@ -246,7 +246,7 @@
       <p class="footer-tagline">Fiches, quiz et assistant IA pour maîtriser le droit du travail français.</p>
     </div>
     <nav class="footer-links" aria-label="Liens du pied de page">
-      <a href="mailto:contact@droittravailfacile.fr">Contact</a>
+      <button class="footer-link-btn" onclick="showModal('contact')">Contact</button>
       <span aria-hidden="true">·</span>
       <a href="https://topsirh.substack.com" target="_blank" rel="noopener noreferrer">Newsletter</a>
       <span aria-hidden="true">·</span>
@@ -260,6 +260,56 @@
     </p>
   </div>
 </footer>
+
+<!-- Modal Formulaire de Contact -->
+<div class="modal-overlay" id="modal-contact" role="dialog" aria-modal="true" aria-labelledby="modal-title-contact" style="display:none" onclick="if(event.target===this)closeModal('contact')">
+  <div class="modal-box contact-modal-box">
+    <button class="modal-close" onclick="closeModal('contact')" aria-label="Fermer">✕</button>
+    <h2 id="modal-title-contact">✉️ Nous contacter</h2>
+    <p class="contact-intro">Une question, une suggestion ou un signalement d'erreur ? Écrivez-nous, nous vous répondrons sous 48h.</p>
+
+    <form id="contact-form" class="contact-form" onsubmit="submitContactForm(event)" novalidate>
+      <div class="cf-field">
+        <label for="cf-name" class="cf-label">Votre prénom / nom <span aria-hidden="true">*</span></label>
+        <input type="text" id="cf-name" name="name" class="cf-input" placeholder="ex : Marie Dupont" required autocomplete="name" aria-required="true"/>
+      </div>
+      <div class="cf-field">
+        <label for="cf-email" class="cf-label">Votre adresse e-mail <span aria-hidden="true">*</span></label>
+        <input type="email" id="cf-email" name="email" class="cf-input" placeholder="ex : marie@exemple.fr" required autocomplete="email" aria-required="true"/>
+      </div>
+      <div class="cf-field">
+        <label for="cf-subject" class="cf-label">Sujet</label>
+        <select id="cf-subject" name="subject" class="cf-input cf-select">
+          <option value="Question juridique">❓ Question juridique</option>
+          <option value="Signalement d'erreur">🐛 Signalement d'erreur</option>
+          <option value="Suggestion d'amélioration">💡 Suggestion d'amélioration</option>
+          <option value="Partenariat / Collaboration">🤝 Partenariat / Collaboration</option>
+          <option value="Autre">💬 Autre</option>
+        </select>
+      </div>
+      <div class="cf-field">
+        <label for="cf-message" class="cf-label">Votre message <span aria-hidden="true">*</span></label>
+        <textarea id="cf-message" name="message" class="cf-input cf-textarea" placeholder="Décrivez votre question ou remarque…" required rows="5" aria-required="true"></textarea>
+      </div>
+      <!-- Honeypot anti-spam -->
+      <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off"/>
+      <input type="hidden" name="_subject" value="💼 Nouveau message — Le Droit du Travail Facile"/>
+
+      <div class="cf-error" id="cf-error" role="alert" style="display:none"></div>
+
+      <button type="submit" class="cf-submit" id="cf-submit">
+        <span id="cf-submit-label">Envoyer le message</span>
+      </button>
+    </form>
+
+    <div id="cf-success" class="cf-success" style="display:none">
+      <div class="cf-success-icon">✅</div>
+      <h3>Message envoyé !</h3>
+      <p>Merci pour votre message. Nous vous répondrons à l'adresse indiquée sous 48h.</p>
+      <button class="cf-close-success" onclick="closeModal('contact')">Fermer</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Mentions Légales -->
 <div class="modal-overlay" id="modal-mentions-legales" role="dialog" aria-modal="true" aria-labelledby="modal-title-mentions" style="display:none" onclick="if(event.target===this)closeModal('mentions-legales')">
