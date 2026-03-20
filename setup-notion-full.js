@@ -91,13 +91,8 @@ async function createPage(dbId, properties, children = []) {
 
 // ─── Programme principal ──────────────────────────────────────────────────────
 async function main() {
-  console.log('🔍 Récupération de la page parente...');
-  const parentId = await getParentPageId();
-  if (!parentId) {
-    console.error('❌ Impossible de trouver la page parente. Assure-toi que la base Fiches est dans une page (pas à la racine du workspace).');
-    process.exit(1);
-  }
-  console.log('✅ Page parente trouvée\n');
+  const parentId = '329bafbd36a5803fbd0eea6e8d34ddce';
+  console.log('✅ Page parente : CMS Droit du Travail\n');
 
   // ── 1. Créer la base Flashcards ──────────────────────────────────────────
   console.log('📦 Création de la base Flashcards...');
