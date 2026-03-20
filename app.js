@@ -279,7 +279,7 @@ function renderFiche(){
   if(nextBtn) {
     nextBtn.onclick=()=>{
       if(!S.completedFiches.includes(f.num)){S.completedFiches.push(f.num);save();}
-      if(S.currentFiche<FICHES.length-1){S.currentFiche++;renderFiche();window.scrollTo(0,0);}
+      if(S.currentFiche<FICHES.length-1){openFiche(S.currentFiche+1);window.scrollTo(0,0);}
       else{toast('🎉 Toutes les fiches lues !','success');showScreen('fiches');}
     };
   }
@@ -626,31 +626,28 @@ function toast(msg,type=''){
 // BLOG — Substack RSS
 // =============================================
 const SUBSTACK_URL = 'https://topsirh.substack.com';
-const RSS_URL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(SUBSTACK_URL+'/feed')}&api_key=public&count=20`;
 let blogPosts = [];
 let blogFilter = 'Tous';
-let blogLoaded = false;
 
 async function loadBlog() {
-  if (blogLoaded) { renderBlog(); return; }
   try {
-    const res = await fetch(RSS_URL);
+    const rssUrl = SUBSTACK_URL + '/feed';
+    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}&t=${Date.now()}`);
     const data = await res.json();
-    if (data.status === 'ok' && data.items) {
-      blogPosts = data.items.map(item => ({
-        title: item.title,
-        excerpt: stripHtml(item.description || item.content || '').slice(0, 160) + '...',
-        date: new Date(item.pubDate).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}),
-        link: item.link,
-        tag: detectTag(item.title + ' ' + (item.description || '')),
-        thumbnail: item.thumbnail || item.enclosure?.link || null
-      }));
-      blogLoaded = true;
-      renderBlogFilters();
-      renderBlog();
-    } else {
-      showBlogError();
-    }
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(data.contents, 'text/xml');
+    const items = Array.from(xml.querySelectorAll('item'));
+    if (!items.length) { showBlogError(); return; }
+    blogPosts = items.map(item => ({
+      title: item.querySelector('title')?.textContent || '',
+      excerpt: stripHtml(item.querySelector('description')?.textContent || '').slice(0, 160) + '...',
+      date: new Date(item.querySelector('pubDate')?.textContent).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}),
+      link: item.querySelector('link')?.textContent || '#',
+      tag: detectTag((item.querySelector('title')?.textContent || '') + ' ' + (item.querySelector('description')?.textContent || '')),
+      thumbnail: null
+    }));
+    renderBlogFilters();
+    renderBlog();
   } catch(e) {
     showBlogError();
   }
