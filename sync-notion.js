@@ -10,8 +10,11 @@ const path = require('path');
 const vm   = require('vm');
 const https = require('https');
 
-const TOKEN  = process.env.NOTION_TOKEN;
-const DB_ID  = process.env.NOTION_DATABASE_ID;
+const TOKEN        = process.env.NOTION_TOKEN;
+const DB_ID        = process.env.NOTION_DATABASE_ID;
+const FLASH_DB_ID  = process.env.NOTION_FLASHCARDS_DB;
+const QUIZ_DB_ID   = process.env.NOTION_QUIZ_DB;
+const RECAP_DB_ID  = process.env.NOTION_RECAP_DB;
 
 if (!TOKEN || !DB_ID) {
   console.error('❌ NOTION_TOKEN ou NOTION_DATABASE_ID manquant dans .env');
@@ -258,6 +261,21 @@ function ficheHtml(f, allFiches) {
 </html>`;
 }
 
+// ─── Récupérer toutes les pages d'une base quelconque ────────────────────────
+async function fetchAllPagesFromDb(dbId) {
+  const pages = [];
+  let cursor = undefined;
+  do {
+    const body = { page_size: 100 };
+    if (cursor) body.start_cursor = cursor;
+    const res = await notionRequest('POST', `databases/${dbId}/query`, body);
+    if (res.object === 'error') { console.warn(`⚠️ Erreur DB ${dbId}: ${res.message}`); break; }
+    pages.push(...res.results);
+    cursor = res.has_more ? res.next_cursor : undefined;
+  } while (cursor);
+  return pages;
+}
+
 // ─── Programme principal ─────────────────────────────────────────────────────
 async function main() {
   console.log('🔄 Connexion à Notion...');
@@ -287,15 +305,11 @@ async function main() {
   // Trier par numéro
   fiches.sort((a, b) => a.num - b.num);
 
-  // Générer data.js
-  const dataJs = `// =============================================\n// DATA — FICHES (généré depuis Notion)\n// =============================================\nconst FICHES = [\n${
+  const dataJsParts = [`// =============================================\n// DATA — FICHES (généré depuis Notion)\n// =============================================\nconst FICHES = [\n${
     fiches.map(f =>
       `  {num:${f.num},title:${JSON.stringify(f.title)},partie:${JSON.stringify(f.partie)},content:${JSON.stringify(f.content)}}`
     ).join(',\n')
-  }\n];\n`;
-
-  fs.writeFileSync('./data.js', dataJs, 'utf8');
-  console.log('\n✅ data.js mis à jour');
+  }\n];`];
 
   // Générer les pages HTML
   const outDir = path.join(__dirname, 'fiches');
@@ -319,7 +333,68 @@ async function main() {
 
   fs.writeFileSync('./sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`, 'utf8');
   console.log('✅ sitemap.xml mis à jour');
-  console.log(`\n🎉 Sync terminé — ${fiches.length} fiches synchronisées depuis Notion !`);
+
+  // ── Sync Flashcards ────────────────────────────────────────────────────
+  if (FLASH_DB_ID) {
+    console.log('\n🔄 Sync Flashcards...');
+    const flashPages = await fetchAllPagesFromDb(FLASH_DB_ID);
+    const flashcards = flashPages.map(p => ({
+      tag: p.properties.Tag?.rich_text?.[0]?.plain_text || '',
+      q:   p.properties.Name?.title?.[0]?.plain_text || '',
+      a:   p.properties.Réponse?.rich_text?.[0]?.plain_text || ''
+    })).filter(f => f.q);
+    dataJsParts.push(`// =============================================\n// DATA — FLASHCARDS (généré depuis Notion)\n// =============================================\nconst FLASHCARDS = [\n${
+      flashcards.map(f => `  {tag:${JSON.stringify(f.tag)},q:${JSON.stringify(f.q)},a:${JSON.stringify(f.a)}}`).join(',\n')
+    }\n];`);
+    console.log(`✅ ${flashcards.length} flashcards synchronisées`);
+  }
+
+  // ── Sync Quiz ──────────────────────────────────────────────────────────
+  if (QUIZ_DB_ID) {
+    console.log('\n🔄 Sync Quiz...');
+    const quizPages = await fetchAllPagesFromDb(QUIZ_DB_ID);
+    const quiz = quizPages.map(p => {
+      const opts = (p.properties.Options?.rich_text?.[0]?.plain_text || '').split(' | ');
+      return {
+        q:    p.properties.Name?.title?.[0]?.plain_text || '',
+        opts,
+        correct: p.properties.Correct?.number ?? 0,
+        expl: p.properties.Explication?.rich_text?.[0]?.plain_text || '',
+        fiche: p.properties.Fiche?.number ?? 1,
+        cat:  p.properties.Catégorie?.rich_text?.[0]?.plain_text || ''
+      };
+    }).filter(q => q.q);
+    dataJsParts.push(`// =============================================\n// DATA — QUIZ (généré depuis Notion)\n// =============================================\nconst QUIZ = [\n${
+      quiz.map(q => `  {q:${JSON.stringify(q.q)},opts:${JSON.stringify(q.opts)},correct:${q.correct},expl:${JSON.stringify(q.expl)},fiche:${q.fiche},cat:${JSON.stringify(q.cat)}}`).join(',\n')
+    }\n];`);
+    console.log(`✅ ${quiz.length} questions synchronisées`);
+  }
+
+  // ── Sync Récap ─────────────────────────────────────────────────────────
+  if (RECAP_DB_ID) {
+    console.log('\n🔄 Sync Récap...');
+    const recapPages = await fetchAllPagesFromDb(RECAP_DB_ID);
+    const recap = recapPages.map(p => {
+      const title   = p.properties.Name?.title?.[0]?.plain_text || '';
+      const contenu = p.properties.Contenu?.rich_text?.[0]?.plain_text || '';
+      const items   = contenu.split('\n').filter(Boolean).map(line => {
+        const idx = line.indexOf(':');
+        if (idx === -1) return { k: line, v: '' };
+        return { k: line.slice(0, idx).trim(), v: line.slice(idx + 1).trim() };
+      });
+      return { title, items };
+    }).filter(r => r.title);
+    dataJsParts.push(`// =============================================\n// DATA — RECAP (généré depuis Notion)\n// =============================================\nconst RECAP = [\n${
+      recap.map(r => `  {title:${JSON.stringify(r.title)},items:${JSON.stringify(r.items)}}`).join(',\n')
+    }\n];`);
+    console.log(`✅ ${recap.length} récaps synchronisés`);
+  }
+
+  // Écrire data.js complet
+  fs.writeFileSync('./data.js', dataJsParts.join('\n\n') + '\n', 'utf8');
+  console.log('\n✅ data.js mis à jour (fiches + flashcards + quiz + récap)');
+
+  console.log(`\n🎉 Sync terminé !`);
   console.log('\nProchaine étape :');
   console.log('  git add . && git commit -m "Sync Notion" && git push origin main');
 }
