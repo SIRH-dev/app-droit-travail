@@ -457,6 +457,9 @@ body.dark .fiches-search{background:var(--surface);color:var(--text);border-colo
 .footer-links a:hover,.footer-link-btn:hover{color:var(--accent)}
 .footer-links span{color:var(--text-dim)}
 .footer-legal{font-size:.72rem;color:var(--text-dim);line-height:1.7;max-width:600px}
+.footer-social{display:flex;gap:.75rem;justify-content:center;margin-bottom:.75rem}
+.footer-social-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--surface2);color:var(--text-muted);transition:all .2s}
+.footer-social-btn:hover{background:var(--accent);color:#fff;transform:translateY(-2px)}
 
 /* ===== MODALS LÉGALES ===== */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:700;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .2s ease}
