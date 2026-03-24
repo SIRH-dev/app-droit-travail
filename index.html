@@ -46,8 +46,25 @@
       <button class="dark-toggle" id="dark-toggle" onclick="toggleDarkMode()" aria-label="Passer en mode sombre">🌙</button>
       <div class="progress-chip" id="global-progress" aria-live="polite">0/28</div>
     </div>
+    <!-- Hamburger mobile uniquement -->
+    <button class="hamburger" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Ouvrir le menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>
+
+<!-- Menu mobile déroulant -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <button class="mobile-menu-item" onclick="closeMobileMenu();showScreen('home')">🏠 Accueil</button>
+  <button class="mobile-menu-item" onclick="closeMobileMenu();showScreen('fiches')">📚 Fiches de cours</button>
+  <button class="mobile-menu-item" onclick="closeMobileMenu();showScreen('flashcards')">🃏 Flashcards</button>
+  <button class="mobile-menu-item" onclick="closeMobileMenu();showScreen('quiz')">🎯 Quiz</button>
+  <button class="mobile-menu-item" onclick="closeMobileMenu();showScreen('blog')">✍️ Blog</button>
+  <button class="mobile-menu-item" onclick="closeMobileMenu();showScreen('chat')">⚖️ Juriste IA</button>
+  <button class="mobile-menu-item" onclick="closeMobileMenu();toggleDarkMode()">🌙 Mode sombre</button>
+  <button class="mobile-menu-item mobile-menu-subscribe" onclick="closeMobileMenu();document.getElementById('subscribe-email').focus();showScreen('home')">📧 S'abonner</button>
+</div>
+<div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
 
 <nav class="bottom-nav" role="navigation" aria-label="Navigation mobile">
   <button class="bottom-nav-item active" onclick="showScreen('home')" aria-label="Accueil"><span class="nav-icon" aria-hidden="true">🏠</span>Accueil</button>

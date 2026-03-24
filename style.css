@@ -18,13 +18,14 @@
 
 /* ===== RESET & BASE ===== */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden;max-width:100%}
 body{
   font-family:'DM Sans',sans-serif;
   color:var(--text);
   background:var(--bg);
   min-height:100vh;
   overflow-x:hidden;
+  max-width:100%;
   padding-bottom:72px;
 }
 
@@ -54,6 +55,13 @@ body{
 .subscribe-btn:hover{background:var(--accent2);color:#fff;transform:translateY(-1px)}
 
 /* ===== BOTTOM NAV & TOP NAV ===== */
+@media(max-width:767px){
+  .juriste-badge{display:none !important}
+  .subscribe-btn{display:none}
+  .progress-chip{display:none}
+  .dark-toggle{display:none}
+  .header-actions{display:none}
+}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:#fff;border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom)}
 .bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.6rem .15rem;cursor:pointer;gap:.2rem;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;transition:all .2s;min-height:60px}
 .bottom-nav-item.active{color:var(--accent)}
@@ -422,6 +430,25 @@ body.dark .chat-input{background:var(--surface2);border-color:var(--border);colo
 body.dark .chat-msg.ai .chat-bubble{background:var(--surface2)}
 body.dark .opt-btn{background:var(--surface2);color:var(--text)}
 body.dark .fiches-search{background:var(--surface);color:var(--text);border-color:var(--border)}
+
+/* ===== HAMBURGER (mobile) ===== */
+.hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:8px;width:40px;height:40px;cursor:pointer;padding:8px;margin-left:auto;flex-shrink:0}
+.hamburger span{display:block;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+@media(max-width:767px){.hamburger{display:flex}}
+@media(min-width:768px){.hamburger{display:none}}
+
+/* ===== MOBILE MENU ===== */
+.mobile-menu{position:fixed;top:65px;left:0;right:0;z-index:199;background:var(--accent-hover);display:flex;flex-direction:column;transform:translateY(-110%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.mobile-menu.open{transform:translateY(0)}
+.mobile-menu-item{background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;padding:1rem 1.5rem;text-align:left;cursor:pointer;transition:background .2s}
+.mobile-menu-item:hover{background:rgba(255,255,255,0.1)}
+.mobile-menu-subscribe{color:#fff;font-weight:700;background:rgba(255,255,255,0.15)}
+.mobile-menu-overlay{display:none;position:fixed;inset:0;z-index:198;background:rgba(0,0,0,.3)}
+.mobile-menu-overlay.open{display:block}
+@media(min-width:768px){.mobile-menu{display:none}.mobile-menu-overlay{display:none !important}}
 
 /* ===== JURISTE IA BADGE (Header) ===== */
 .juriste-badge{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);padding:.4rem .85rem;border-radius:20px;cursor:pointer;font-size:.82rem;font-weight:700;white-space:nowrap;flex-shrink:0;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;gap:.3rem}
