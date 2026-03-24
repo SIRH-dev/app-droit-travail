@@ -473,7 +473,7 @@ body.dark .fiches-search{background:var(--surface);color:var(--text);border-colo
 /* ===== SHARE BAR (Reader) ===== */
 .reader-share-bar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:1.25rem 0 .5rem;margin-top:1rem;border-top:1px solid var(--border)}
 .reader-share-label{font-size:.78rem;font-weight:700;color:var(--text-muted);margin-right:.2rem}
-.reader-share-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .85rem;border-radius:8px;text-decoration:none;font-size:.78rem;font-weight:700;color:#fff;transition:opacity .2s;white-space:nowrap}
+.reader-share-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .85rem;border-radius:8px;text-decoration:none;font-size:.78rem;font-weight:700;color:#fff;transition:opacity .2s;white-space:nowrap;cursor:pointer;border:none;font-family:'DM Sans',sans-serif}
 .reader-share-btn:hover{opacity:.85}
 .share-whatsapp{background:#25D366}
 .share-linkedin{background:#0077b5}
