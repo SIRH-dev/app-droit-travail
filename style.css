@@ -72,12 +72,14 @@ body{
 /* ===== SCREENS ===== */
 .screen{display:none;min-height:calc(100vh - 65px)}
 .screen.active{display:block}
+@media(max-width:767px){.screen{min-height:auto}}
 
 /* ===== HOME & NOUVEAU BLOC INSCRIPTION ===== */
+.home-hero-wrapper{background:var(--accent);width:100%}
 .home-hero{padding:4rem 1.25rem 2rem;text-align:center;max-width:850px;margin:0 auto}
-.home-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,6vw,4rem);font-weight:900;line-height:1.1;color:var(--accent2);margin-bottom:1rem;animation:floatIn .7s ease both}
-.home-hero h1 em{font-style:normal;color:var(--accent)}
-.home-hero p{color:var(--text-muted);font-size:1.05rem;line-height:1.7;max-width:600px;margin:0 auto 4rem;animation:floatIn .7s .1s ease both}
+.home-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,6vw,4rem);font-weight:900;line-height:1.1;color:#fff;margin-bottom:1rem;animation:floatIn .7s ease both}
+.home-hero h1 em{font-style:normal;color:rgba(255,255,255,0.85)}
+.home-hero p{color:rgba(255,255,255,0.9);font-size:1.05rem;line-height:1.7;max-width:600px;margin:0 auto 4rem;animation:floatIn .7s .1s ease both}
 
 .lead-magnet-block {
   background: var(--accent);
@@ -442,6 +444,16 @@ body.dark .fiches-search{background:var(--surface);color:var(--text);border-colo
 .fiche-card.fiche-locked{opacity:.55;cursor:default}
 .fiche-card.fiche-locked:hover{border-color:var(--border);box-shadow:none;transform:none}
 .fiche-lock-icon{font-size:.65rem;vertical-align:middle}
+
+/* ===== SHARE BAR (Reader) ===== */
+.reader-share-bar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:1.25rem 0 .5rem;margin-top:1rem;border-top:1px solid var(--border)}
+.reader-share-label{font-size:.78rem;font-weight:700;color:var(--text-muted);margin-right:.2rem}
+.reader-share-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .85rem;border-radius:8px;text-decoration:none;font-size:.78rem;font-weight:700;color:#fff;transition:opacity .2s;white-space:nowrap}
+.reader-share-btn:hover{opacity:.85}
+.share-whatsapp{background:#25D366}
+.share-linkedin{background:#0077b5}
+.share-x{background:#000}
+.share-facebook{background:#1877f2}
 
 /* ===== DISCLAIMER CHAT ===== */
 .chat-disclaimer{padding:.55rem 1.25rem;font-size:.72rem;color:var(--text-dim);background:var(--surface2);border-top:1px solid var(--border);text-align:center;line-height:1.5}
