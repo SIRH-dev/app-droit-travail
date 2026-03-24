@@ -158,6 +158,12 @@ function blocksToHtml(blocks) {
         });
         html += '</tr>';
         break;
+      case 'image': {
+        const imgUrl = content.type === 'external' ? content.external?.url : content.file?.url;
+        const caption = content.caption ? richTextToHtml(content.caption) : '';
+        if (imgUrl) html += `<figure><img src="${imgUrl}" alt="${caption}" style="max-width:100%;border-radius:8px;margin:1rem 0" />${caption ? `<figcaption style="font-size:.82rem;color:#6b7280;text-align:center">${caption}</figcaption>` : ''}</figure>`;
+        break;
+      }
       case 'divider':
         html += '<hr>';
         break;
