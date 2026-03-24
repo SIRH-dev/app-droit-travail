@@ -158,6 +158,11 @@ function blocksToHtml(blocks) {
         });
         html += '</tr>';
         break;
+      case 'embed': {
+        const embedUrl = content.url;
+        if (embedUrl) html += `<div style="position:relative;width:100%;padding-bottom:56.25%;margin:1rem 0"><iframe src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:8px" allowfullscreen loading="lazy"></iframe></div>`;
+        break;
+      }
       case 'image': {
         const imgUrl = content.type === 'external' ? content.external?.url : content.file?.url;
         const caption = content.caption ? richTextToHtml(content.caption) : '';
