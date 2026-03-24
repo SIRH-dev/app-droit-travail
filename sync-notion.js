@@ -192,7 +192,7 @@ function slugify(str) {
 // ─── Template HTML fiche ─────────────────────────────────────────────────────
 function ficheHtml(f, allFiches) {
   const slug      = `${f.num}-${slugify(f.title)}`;
-  const canonical = `https://droittravailfacile.fr/fiches/${slug}.html`;
+  const canonical = `https://sirh-dev.github.io/app-droit-travail/fiches/${slug}.html`;
   const desc      = f.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 155) + '…';
   const prev      = allFiches.find(x => x.num === f.num - 1);
   const next      = allFiches.find(x => x.num === f.num + 1);
@@ -247,8 +247,8 @@ function ficheHtml(f, allFiches) {
 <body>
   <div class="wrapper">
     <nav class="breadcrumb">
-      <a href="https://droittravailfacile.fr">Accueil</a> ›
-      <a href="https://droittravailfacile.fr/#fiches">Fiches</a> ›
+      <a href="https://sirh-dev.github.io/app-droit-travail">Accueil</a> ›
+      <a href="https://sirh-dev.github.io/app-droit-travail/#fiches">Fiches</a> ›
       Fiche ${f.num}
     </nav>
     <div class="partie-badge">${f.partie}</div>
@@ -261,7 +261,7 @@ function ficheHtml(f, allFiches) {
       <a class="share-btn share-facebook" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}" target="_blank" rel="noopener">Facebook</a>
     </div>
     <div class="cta">
-      <a href="https://droittravailfacile.fr">Accéder à toutes les fiches + Quiz + IA →</a>
+      <a href="https://sirh-dev.github.io/app-droit-travail">Accéder à toutes les fiches + Quiz + IA →</a>
     </div>
     <nav class="nav-fiches">
       ${prev ? `<a href="./${prev.num}-${slugify(prev.title)}.html">← Fiche ${prev.num}</a>` : '<span></span>'}
@@ -335,10 +335,10 @@ async function main() {
   // Générer sitemap.xml
   const today = new Date().toISOString().split('T')[0];
   const urls = [
-    `  <url><loc>https://droittravailfacile.fr/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>`,
+    `  <url><loc>https://sirh-dev.github.io/app-droit-travail/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>`,
     ...fiches.map(f => {
       const slug = `${f.num}-${slugify(f.title)}`;
-      return `  <url><loc>https://droittravailfacile.fr/fiches/${slug}.html</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`;
+      return `  <url><loc>https://sirh-dev.github.io/app-droit-travail/fiches/${slug}.html</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`;
     })
   ].join('\n');
 

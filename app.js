@@ -310,7 +310,7 @@ function renderFiche(){
   }
 
   // Share bar
-  const ficheUrl = `https://droittravailfacile.fr/fiches/${f.num}-${slugify(f.title)}.html`;
+  const ficheUrl = `https://sirh-dev.github.io/app-droit-travail/fiches/${f.num}-${slugify(f.title)}.html`;
   const shareText = encodeURIComponent(`Fiche ${f.num} — ${f.title} | Le Droit du Travail Facile`);
   const shareUrl = encodeURIComponent(ficheUrl);
   const shareBar = document.createElement('div');
